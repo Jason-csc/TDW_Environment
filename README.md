@@ -1,5 +1,5 @@
 # TDW_Environment
-Simulated Environment using TDW
+Simulated Environment using ThreeDWorld ([TDW](https://github.com/threedworld-mit/tdw))
 
 ## Set up
 Intall TDW: **`pip3 install tdw --user`**
