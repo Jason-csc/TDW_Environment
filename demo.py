@@ -6,10 +6,10 @@ Demo for magnet robot in TDW
 from tdw.controller import Controller
 from tdw.tdw_utils import TDWUtils
 from tdw.add_ons.third_person_camera import ThirdPersonCamera
-from tdw.add_ons.image_capture import ImageCapture
+# from tdw.add_ons.image_capture import ImageCapture
 from magnebot import Magnebot, ActionStatus, Arm
 from tdw.librarian import ModelLibrarian
-
+from imagecapture import ImgCaptureModified
 
 # # show all the objects in TDW
 # librarian = ModelLibrarian()
@@ -27,7 +27,7 @@ camera = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": -1.6},
 # path: directory to store images
 path = "image_dir"
 print(f"Images will be saved to: {path}")
-capture = ImageCapture(avatar_ids=["a"], path=path)
+capture = ImgCaptureModified(avatar_ids=["a"], path=path)
 # Note the order of add-ons. The Magnebot must be added first so that the camera can look at it.
 c.add_ons.extend([magnebot, camera, capture])
 # c.add_ons.extend([magnebot])
@@ -49,6 +49,7 @@ commands.extend(c.get_add_physics_object(model_name='serving_bowl',
                                         position={"x": -0.3, "y": 0.85, "z": -1},
                                         rotation={"x":0,"y":120,"z":0},
                                         mass = 3,
+                                        bounciness=0,
                                         static_friction = 1,
                                         object_id=bowl_id,
                                         ))
@@ -57,6 +58,7 @@ apple_id = c.get_unique_id()
 commands.extend(c.get_add_physics_object(model_name='apple',
                                      library="models_core.json",
                                         position={"x": 0.2, "y": 0.8682562, "z": -1.1},
+                                        mass = 3,
                                         bounciness=0,
                                         object_id=apple_id))
 
