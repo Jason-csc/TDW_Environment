@@ -29,7 +29,6 @@ camera = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": -1.55},
                            rotation={"x": 30, "y": 0, "z": 0},
                            field_of_view = 100,
                            avatar_id="a")
-# path: directory to store images
 
 capture = ImgCaptureModified(avatar_ids=["a"],png=True)
 # Note the order of add-ons. The Magnebot must be added first so that the camera can look at it.
