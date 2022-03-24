@@ -1,10 +1,15 @@
 from typing import List, Union, Dict
 from pathlib import Path
+import PIL
 from PIL.Image import Image
 from tdw.add_ons.add_on import AddOn
 from tdw.tdw_utils import TDWUtils
 from tdw.output_data import OutputData, Images
 import numpy
+import socket
+import time
+import json
+import cv2
 
 class ImgCaptureModified(AddOn):
     """
@@ -37,7 +42,7 @@ class ImgCaptureModified(AddOn):
     # A list of valid pass masks.
     _PASS_MASKS: List[str] = list(Images.PASS_MASKS.values())
 
-    def __init__(self, path: Union[str, Path], avatar_ids: List[str] = None, png: bool = False, pass_masks: List[str] = None):
+    def __init__(self, path: Union[str, Path]=None, avatar_ids: List[str] = None, png: bool = False, pass_masks: List[str] = None):
         """
         :param path: The path to the output directory.
         :param avatar_ids: The IDs of the avatars that will capture and save images. If empty, all avatars will capture and save images. Note that these avatars must already exist in the scene (if you've added the avatars via a [`ThirdPersonCamera` add-on](third_person_camera.md), you must add the `ThirdPersonCamera` first, *then* `ImageCapture`).
@@ -50,15 +55,15 @@ class ImgCaptureModified(AddOn):
         The current frame count. This is used to generate filenames.
         """
         self.frame: int = 0
-        if isinstance(path, str):
-            """:field
-            The path to the output directory.
-            """
-            self.path: Path = Path(path)
-        else:
-            self.path: Path = path
-        if not self.path.exists():
-            self.path.mkdir(parents=True)
+        # if isinstance(path, str):
+        #     """:field
+        #     The path to the output directory.
+        #     """
+        #     self.path: Path = Path(path)
+        # else:
+        #     self.path: Path = path
+        # if not self.path.exists():
+        #     self.path.mkdir(parents=True)
         if avatar_ids is None:
             """:field
             The IDs of the avatars that will capture and save images. If empty, all avatars will capture and save images.
@@ -102,16 +107,16 @@ class ImgCaptureModified(AddOn):
                 # Store the image data.
                 self.images[a] = images
                 if self._save and (len(self.avatar_ids) == 0 or a in self.avatar_ids):
-                    output_dir = self.path.joinpath(a)
-                    if not output_dir.exists():
-                        output_dir.mkdir(parents=True)
+                    # output_dir = self.path.joinpath(a)
+                    # if not output_dir.exists():
+                    #     output_dir.mkdir(parents=True)
                     latest_frame = self.get_pil_images()
-                    print(numpy.array(latest_frame['a']['_img']))
-                    # Save images.
-                    TDWUtils.save_images(images=images,
-                                         output_directory=str(output_dir.resolve()),
-                                         filename=TDWUtils.zero_padding(self.frame, 4))
-                    got_images = True
+                    frame = numpy.array(latest_frame['a']['_img'])
+                    tmp = frame[:,:,0].copy()
+                    frame[:,:,0] = frame[:,:,2]
+                    frame[:,:,2] = tmp
+                    cv2.imshow('Interactive Window',frame)
+                    cv2.waitKey(1)
         if got_images:
             self.frame += 1
         # If we're requesting images per-frame, send the command.
