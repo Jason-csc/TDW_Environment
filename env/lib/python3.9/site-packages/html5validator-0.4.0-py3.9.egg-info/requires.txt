@@ -1,0 +1,5 @@
+PyYAML
+
+[tests]
+hacking
+nose
