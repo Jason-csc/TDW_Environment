@@ -42,7 +42,7 @@ class ImgCaptureModified(AddOn):
     # A list of valid pass masks.
     _PASS_MASKS: List[str] = list(Images.PASS_MASKS.values())
 
-    def __init__(self, path: Union[str, Path]=None, avatar_ids: List[str] = None, png: bool = False, pass_masks: List[str] = None):
+    def __init__(self, path: Union[str, Path]=None, avatar_ids: List[str] = None, png: bool = False, pass_masks: List[str] = None, image_q = None):
         """
         :param path: The path to the output directory.
         :param avatar_ids: The IDs of the avatars that will capture and save images. If empty, all avatars will capture and save images. Note that these avatars must already exist in the scene (if you've added the avatars via a [`ThirdPersonCamera` add-on](third_person_camera.md), you must add the `ThirdPersonCamera` first, *then* `ImageCapture`).
@@ -84,6 +84,9 @@ class ImgCaptureModified(AddOn):
         Raw [`Images` output data](../../api/output_data.md#Images) from the build. Key = The ID of the avatar. This is updated per frame. If an avatar didn't capture an image on this frame, it won't be in this dictionary.
         """
         self.images: Dict[str, Images] = dict()
+        
+        """Add Image queue"""
+        self.image_q = image_q
 
     def get_initialization_commands(self) -> List[dict]:
         commands = [{"$type": "set_img_pass_encoding",
@@ -115,8 +118,9 @@ class ImgCaptureModified(AddOn):
                     tmp = frame[:,:,0].copy()
                     frame[:,:,0] = frame[:,:,2]
                     frame[:,:,2] = tmp
-                    cv2.imshow('Interactive Window',frame)
-                    cv2.waitKey(1)
+                    self.image_q.append(frame)
+                    # cv2.imshow('Interactive Window',frame)
+                    # cv2.waitKey(1)
         if got_images:
             self.frame += 1
         # If we're requesting images per-frame, send the command.
