@@ -1,3 +1,0 @@
-[console_scripts]
-html5validator = html5validator.cli:main
-
