@@ -6,7 +6,6 @@ set -x
 python3 -m venv env
 source env/bin/activate
 
-<<<<<<< HEAD
 
 pip install --upgrade pip
 pip install -r requirements.txt
@@ -16,8 +15,5 @@ tar -xvzf TDW_Linux.tar.gz
 rm -rf TDW_Linux.tar.gz
 
 
-=======
-pip install -r requirements.txt
->>>>>>> 0762c0d7d2aac0e7db5a3bccc71e2fc9d41cceea
 pip install -e .
 

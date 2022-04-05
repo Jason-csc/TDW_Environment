@@ -1,21 +1,9 @@
-<<<<<<< HEAD
 Metadata-Version: 1.2
-=======
-Metadata-Version: 2.1
->>>>>>> 0762c0d7d2aac0e7db5a3bccc71e2fc9d41cceea
 Name: tdwENV
 Version: 0.1.0
 Summary: UNKNOWN
 Home-page: UNKNOWN
 License: UNKNOWN
-<<<<<<< HEAD
 Description: UNKNOWN
 Platform: UNKNOWN
 Requires-Python: >=3.6
-=======
-Platform: UNKNOWN
-Requires-Python: >=3.6
-
-UNKNOWN
-
->>>>>>> 0762c0d7d2aac0e7db5a3bccc71e2fc9d41cceea
