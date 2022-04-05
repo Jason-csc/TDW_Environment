@@ -12,6 +12,7 @@ pip install -r requirements.txt
 
 wget https://github.com/threedworld-mit/tdw/releases/download/v1.9.12/TDW_Linux.tar.gz
 tar -xvzf TDW_Linux.tar.gz
+rm -rf TDW_Linux.tar.gz
 
 
 pip install -e .
