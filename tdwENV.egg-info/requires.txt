@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 Flask
 arrow
 bs4
+=======
+arrow
+bs4
+Flask
+>>>>>>> 0762c0d7d2aac0e7db5a3bccc71e2fc9d41cceea
 html5validator
 pycodestyle
 pydocstyle

@@ -7,7 +7,11 @@ env/
 venv/
 venv3/
 .venv/
+<<<<<<< HEAD
 .pytest_cache
 
 *.tar.gz
 TDW/
+=======
+.pytest_cache
+>>>>>>> 0762c0d7d2aac0e7db5a3bccc71e2fc9d41cceea
