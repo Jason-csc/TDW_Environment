@@ -1,6 +1,6 @@
+Flask
 arrow
 bs4
-Flask
 html5validator
 pycodestyle
 pydocstyle
