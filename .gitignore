@@ -10,3 +10,4 @@ venv3/
 .pytest_cache
 
 *.tar.gz
+TDW/
