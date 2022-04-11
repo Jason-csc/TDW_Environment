@@ -116,6 +116,7 @@ def startTDW(imgQueue,prepared):
     while True:
         cmd = input(">>Input Command: ")
         if cmd == "pick apple":
+            print("picking")
             magnebot.grasp(apple_id,Arm.right)
             while magnebot.action.status == ActionStatus.ongoing:
                 c.communicate([])
@@ -125,7 +126,6 @@ def startTDW(imgQueue,prepared):
             while magnebot.action.status == ActionStatus.ongoing:
                 c.communicate([])
             c.communicate([])
-            print(magnebot.action.status)
         elif cmd == "drop":
             magnebot.reach_for(target={"x": -0.22, "y": 1.25, "z": -1}, arm=Arm.right)
             while magnebot.action.status == ActionStatus.ongoing:
@@ -151,3 +151,8 @@ def startTDW(imgQueue,prepared):
             break
 
 
+def main():
+    startTDW([],[False])
+
+if __name__ == "__main__":
+    main()

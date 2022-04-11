@@ -6,9 +6,9 @@ APPLICATION_ROOT = '/'
 SECRET_KEY = b'\xba\xf0x\xf3\x92Ol\xad\x9a\x18\xcb\x88\xd3\xe35=\xb7\xbdZ\xdf5\xab1/'
 SESSION_COOKIE_NAME = 'login'
 # File Upload to var/uploads/
-INSTA485_ROOT = pathlib.Path(__file__).resolve().parent.parent
-UPLOAD_FOLDER = INSTA485_ROOT/'var'/'uploads'
+tdwENV_ROOT = pathlib.Path(__file__).resolve().parent.parent
+UPLOAD_FOLDER = tdwENV_ROOT/'var'/'uploads'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 
-DATABASE_FILENAME = INSTA485_ROOT/'var'/'tdwENV.sqlite3'
+DATABASE_FILENAME = tdwENV_ROOT/'var'/'tdwENV.sqlite3'
