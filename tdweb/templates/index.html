@@ -6,92 +6,61 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Include the Bulma CSS framework for styling -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" rel="stylesheet">
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"> -->
   <title>TDW</title>
 </head>
 
-  <!-- <body>
-    <h1>Live streaming Demo</h1>
-    <div>
 
-        <img src="{{ url_for('video') }}" width="35%"/>
+
+<body id="{{player}}">
+
+  <section class="hero is-small is-success mb-4">
+    <div class="hero-body">
+      <h1 class="title is-1">ThreeDworld</h1>
+      <p class="subtitle is-4">
+        Control your robot to complete the task.
+        Feel free to chat with your collaborator
+      </p>
     </div>
-            
-  </body> -->
+  </section>
 
 
+  <div class="container">
+    <div class="columns">
 
-  <body>
-
-      <section class="hero is-small is-success mb-4">
-          <div class="hero-body">
-              <h1 class="title is-1">ThreeDworld</h1>
-              <p class="subtitle is-4">
-                  Control your robot to complete the task. 
-                  Feel free to chat with your collaborator
-              </p>
-          </div>
-      </section>
-  
-  
-      <div class="container">
-          <div class="columns">
-  
-            <div class="column is-7", id="vid">
-              <div>
-                <img src="{{ url_for('video') }}" width="50%"/>
-              </div>
-              <!-- <div class="field">
-                <label class="label">Input your Command:</label>
-                <div class="control">
-                  <input class="input" type="command" placeholder="pick/drop [item]">
-                </div>
-              </div> -->
-              <form action="/?target=command" method="post" enctype="multipart/form-data">
-                <label class="label">Input your Command:</label>
-                <div class="control">
-                  <input class="input" type="text" name="text" placeholder="pick/drop [item]">
-                </div><br>
-                <button class="button is-primary" name="comment" value="submit">submit</button>
-            </form>
-            
-              <!-- <button class="button is-primary">submit</button> -->
-            
-            </div>
-          
-          <div class="column">
-          <form class="box">
-            <div class="field">
-              <label class="label" style="font-size:2vw; width:400px">Chat box</label>
-              <div class="box">
-                Player 2:  Hello !
-              </div>
-              <div class="box">
-                You:  Hi !
-              </div>
-              <div class="box">
-                You:  I'm going to place the apple into the bowl.
-              </div>
-              <div class="control">
-                <input class="input" type="text" placeholder="chat with your collaborator">
-              </div>
-            </div>
-          
-          
-            <button class="button is-primary">Send</button>
-          </form>
-          </div>
-          
-          </div>
-  
-          </div>
+      <div class="column is-7" , id="vid">
+        <div>
+          <!-- <img src="{{ url_for('video') }}" width="50%" /> -->
+          <img src="{{ url_for('static', filename='test.jpg') }}" width="50%" />
+        </div>
+        <form action="/?target=command" method="post" enctype="multipart/form-data">
+          <label class="label">Input your Command:</label>
+          <div class="control">
+            <input class="input" type="text" name="text" placeholder="pick/drop [item]">
+          </div><br>
+          <button class="button is-primary" name="comment" value="submit">submit</button>
+        </form>
       </div>
-  
-  
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-  
-  </body>
+
+
+      <div id="reactEntry">
+        Loading ...
+      </div>
+      <!-- Load JavaScript -->
+      <script type="text/javascript" src="{{ url_for('static', filename='js/bundle.js') }}"></script>
+
+
+    </div>
+
+  </div>
+  </div>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
 
 </html>

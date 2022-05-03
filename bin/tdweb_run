@@ -1,10 +1,15 @@
 #!/bin/bash
 
+
 set -Eeuo pipefail
 set -x
 
-
-source env/bin/activate
+if [ ! -e "var/tdweb.sqlite3" ]; then
+    bin/tdwebdb create
+fi
+test -e var/tdweb.sqlite3
 export FLASK_ENV=development
+FLASK_ENV=development
 export FLASK_APP=tdweb
+FLASK_APP=tdweb
 flask run --host 0.0.0.0 --port 8000

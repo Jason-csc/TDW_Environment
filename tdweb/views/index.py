@@ -21,27 +21,42 @@ prepared = [False]
 commands = []
 prev = None
 
-@tdweb.app.route('/',methods=['GET','POST'])
-def show_index():
+# @tdweb.app.route('/',methods=['GET','POST'])
+# def show_index():
+#     """Display / route."""
+#     context = {}
+#     # target = flask.request.args.get("target",default=None)
+#     # if target is None:       
+        
+#     #     thread = threading.Thread(target=startTDW,args=(camera,prepared,commands))
+#     #     thread.start()
+
+#     #     while True:
+#     #         if prepared[0]:
+#     #             break
+#     #         time.sleep(0.1)
+#     # else:
+#     #     command = flask.request.form['text']
+#     #     print("get command",command)
+#     #     commands.append(command)
+
+#     return flask.render_template("index.html", **context)
+
+
+@tdweb.app.route('/player1/',methods=['GET'])
+def show_player1():
     """Display / route."""
     context = {}
-    target = flask.request.args.get("target",default=None)
-    if target is None:       
-        
-        thread = threading.Thread(target=startTDW,args=(camera,prepared,commands))
-        thread.start()
-
-        while True:
-            if prepared[0]:
-                break
-            time.sleep(0.1)
-    else:
-        command = flask.request.form['text']
-        print("get command",command)
-        commands.append(command)
-
+    context["player"] = "player1"
     return flask.render_template("index.html", **context)
 
+
+@tdweb.app.route('/player2/',methods=['GET'])
+def show_player2():
+    """Display / route."""
+    context = {}
+    context["player"] = "player2"
+    return flask.render_template("index.html", **context)
 
 
 # def out(c):
@@ -75,6 +90,4 @@ def generate_frames():
 @tdweb.app.route('/video')
 def video():
     return Response(generate_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
 

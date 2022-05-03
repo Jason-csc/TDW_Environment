@@ -13,3 +13,4 @@ app.config.from_envvar('tdweb_SETTINGS', silent=True)
 # going to tell pylint and pycodestyle to ignore this coding style violation.
 import tdweb.views  # noqa: E402  pylint: disable=wrong-import-position
 import tdweb.model  # noqa: E402  pylint: disable=wrong-import-position
+import tdweb.api # noqa: E402  pylint: disable=wrong-import-position

@@ -1,0 +1,41 @@
+#!/bin/bash
+# tdweb_db
+
+set -Eeuo pipefail
+set -x
+
+# Sanity check command line options
+usage() {
+  echo "Usage: $0 (create|destroy|reset|dump|random)"
+}
+
+if [ $# -ne 1 ]; then
+  usage
+  exit 1
+fi
+
+# Parse argument.  $1 is the first argument
+case $1 in
+  "create")
+    sqlite3 var/tdweb.sqlite3 < sql/schema.sql
+    ;;
+
+  "destroy")
+    rm -rf var/tdweb.sqlite3
+    ;;
+
+  "reset")
+    rm -rf var/tdweb.sqlite3
+    sqlite3 var/tdweb.sqlite3 < sql/schema.sql
+    ;;
+
+  "dump")
+    sqlite3 -batch -line var/tdweb.sqlite3 'SELECT * FROM chats'
+    ;;
+
+  
+  *)
+    usage
+    exit 1
+    ;;
+esac
