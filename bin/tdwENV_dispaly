@@ -1,4 +1,0 @@
-#!/bin/bash
-
-cd TDW/
-DISPLAY=:2.0 ./TDW.x86_64 -port=1071

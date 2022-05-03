@@ -1,36 +1,44 @@
 """
-tdwENVindex (main) view.
+tdwebindex (main) view.
 URLs include:
 /
 """
 from queue import Queue
 import flask
 from flask import Flask,render_template,Response
-import tdwENV
+import tdweb
 import threading
 import numpy as np
 import time
 
-from tdwENV.views.TDW import startTDW
+from tdweb.views.TDW import startTDW
 
 
 import cv2
 
 camera=[]
 prepared = [False]
+commands = []
 prev = None
 
-@tdwENV.app.route('/')
+@tdweb.app.route('/',methods=['GET','POST'])
 def show_index():
     """Display / route."""
     context = {}
-    thread = threading.Thread(target=startTDW,args=(camera,prepared,))
-    thread.start()
+    target = flask.request.args.get("target",default=None)
+    if target is None:       
+        
+        thread = threading.Thread(target=startTDW,args=(camera,prepared,commands))
+        thread.start()
 
-    while True:
-        if prepared[0]:
-            break
-        time.sleep(0.1)
+        while True:
+            if prepared[0]:
+                break
+            time.sleep(0.1)
+    else:
+        command = flask.request.form['text']
+        print("get command",command)
+        commands.append(command)
 
     return flask.render_template("index.html", **context)
 
@@ -52,7 +60,11 @@ def generate_frames():
             frame = prev
         else:
             frame=camera.pop(0)
+            tmp = frame[:,:,0].copy()
+            frame[:,:,0] = frame[:,:,2]
+            frame[:,:,2] = tmp
             prev = frame
+        
         ret,buffer=cv2.imencode('.jpg',frame)
         frame=buffer.tobytes()
 
@@ -60,6 +72,9 @@ def generate_frames():
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
-@tdwENV.app.route('/video')
+@tdweb.app.route('/video')
 def video():
     return Response(generate_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+

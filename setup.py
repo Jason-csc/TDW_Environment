@@ -1,15 +1,9 @@
-"""
-Insta485 python package configuration.
-
-Andrew DeOrio <awdeorio@umich.edu>
-"""
-
 from setuptools import setup
 
 setup(
-    name='tdwENV',
+    name='tdweb',
     version='0.1.0',
-    packages=['tdwENV'],
+    packages=['tdweb'],
     include_package_data=True,
     install_requires=[
         'arrow',

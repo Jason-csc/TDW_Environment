@@ -115,9 +115,6 @@ class ImgCaptureModified(AddOn):
                     #     output_dir.mkdir(parents=True)
                     latest_frame = self.get_pil_images()
                     frame = numpy.array(latest_frame['a']['_img'])
-                    tmp = frame[:,:,0].copy()
-                    frame[:,:,0] = frame[:,:,2]
-                    frame[:,:,2] = tmp
                     self.image_q.append(frame)
                     # cv2.imshow('Interactive Window',frame)
                     # cv2.waitKey(1)

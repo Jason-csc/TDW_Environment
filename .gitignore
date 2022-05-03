@@ -9,6 +9,12 @@ venv/
 venv3/
 .venv/
 .pytest_cache
+node_modules/
+cookies.txt
+bundle.js
+session.json
+tmp
+var
 
 *.tar.gz
 TDW/

@@ -9,13 +9,13 @@ from tdw.add_ons.third_person_camera import ThirdPersonCamera
 # from tdw.add_ons.image_capture import ImageCapture
 from magnebot import Magnebot, ActionStatus, Arm
 from tdw.librarian import ModelLibrarian
-from tdwENV.views.imagecapture import ImgCaptureModified
+from tdweb.views.imagecapture import ImgCaptureModified
 
 import numpy as np
 import numpy
 import cv2
 
-
+import time
 
 # # show all the objects in TDW
 # librarian = ModelLibrarian()
@@ -23,8 +23,8 @@ import cv2
 #     print(record.name)
 
 
-def startTDW(imgQueue,prepared):
-    c = Controller()
+def startTDW(imgQueue,prepared,cmds):
+    c = Controller(launch_build=False)
     magnebot = Magnebot(position={"x": 0, "y": 0, "z": -1.67}, rotation={"x": 0, "y": 0, "z": 0},robot_id=c.get_unique_id())
     magnebot2 = Magnebot(position={"x": 0, "y": 0, "z": 1.67}, rotation={"x": 0, "y": 180, "z": 0},robot_id=c.get_unique_id())
     # Create a camera and enable image capture.
@@ -37,14 +37,15 @@ def startTDW(imgQueue,prepared):
     capture = ImgCaptureModified(avatar_ids=["a"],png=False,image_q=imgQueue)
     # Note the order of add-ons. The Magnebot must be added first so that the camera can look at it.
     c.add_ons.extend([magnebot, magnebot2, camera, capture])
-    # c.add_ons.extend([magnebot])
+    # c.add_ons.extend([magnebot, magnebot2, camera])
 
 
     print("Setting Up Scene...")
     '''Set up scene'''
     commands = [{"$type": "set_screen_size",
-                    "width": 500,
-                    "height": 500}]
+                    "width": 350,
+                    "height": 350}]
+    # commands.extend([{"$type": "set_render_quality", "render_quality": 5}])
     commands.extend([TDWUtils.create_empty_room(12, 12)])
     commands.extend(c.get_add_physics_object(model_name='quatre_dining_table',
                                         #  library="models_core.json",
@@ -114,14 +115,19 @@ def startTDW(imgQueue,prepared):
 
     '''Control the robot by pick/drop'''
     while True:
-        cmd = input(">>Input Command: ")
+        if len(cmds) == 0:
+            time.sleep(0.1)
+            continue
+        else:
+            cmd = cmds.pop(0)
+            print(f"tdw getting {cmd}")
         if cmd == "pick apple":
             print("picking")
             magnebot.grasp(apple_id,Arm.right)
             while magnebot.action.status == ActionStatus.ongoing:
                 c.communicate([])
             c.communicate([])
-            # print(magnebot.action.status)
+            print(magnebot.action.status)
             magnebot.reach_for(target={"x": 0.1, "y": 1.3, "z": -1}, arm=Arm.right)
             while magnebot.action.status == ActionStatus.ongoing:
                 c.communicate([])
