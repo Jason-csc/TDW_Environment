@@ -18,3 +18,6 @@ wget https://github.com/threedworld-mit/tdw/releases/download/v1.9.14/TDW_Linux.
 tar -xvzf TDW_Linux.tar.gz
 rm -rf TDW_Linux.tar.gz
 
+if [ ! -e "var" ]; then
+    mkdir var
+fi

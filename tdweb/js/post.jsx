@@ -88,11 +88,13 @@ class Post extends React.Component {
 
     render() {
         const { chats, value } = this.state;
+        const video_url = 'video_' + document.body.id;
+        console.log(video_url);
         return (
             <div class="column">
                 <div class="box">
                     <div class="field">
-                        <label class="label" style={{fontSize:'2vw', width:'500px'}}>Chat box</label>
+                        <label class="label" style={{ fontSize: '2vw', width: '500px' }}>Chat box</label>
                         <div className="chat">
                             <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
                                 {

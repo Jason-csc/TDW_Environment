@@ -10,6 +10,7 @@ from tdw.add_ons.third_person_camera import ThirdPersonCamera
 from magnebot import Magnebot, ActionStatus, Arm
 from tdw.librarian import ModelLibrarian
 from tdweb.views.imagecapture import ImgCaptureModified
+from tdw.add_ons.object_manager import ObjectManager
 
 import numpy as np
 import numpy
@@ -23,7 +24,7 @@ import time
 #     print(record.name)
 
 
-def startTDW(imgQueue,prepared,cmds):
+def startTDW(imgQueue,prepared,cmds=[]):
     c = Controller(launch_build=False)
     magnebot = Magnebot(position={"x": 0, "y": 0, "z": -1.67}, rotation={"x": 0, "y": 0, "z": 0},robot_id=c.get_unique_id())
     magnebot2 = Magnebot(position={"x": 0, "y": 0, "z": 1.67}, rotation={"x": 0, "y": 180, "z": 0},robot_id=c.get_unique_id())
@@ -32,11 +33,12 @@ def startTDW(imgQueue,prepared,cmds):
                             rotation={"x": 30, "y": 0, "z": 0},
                             field_of_view = 100,
                             avatar_id="a")
-    # path: directory to store images
+                            
+    om = ObjectManager(transforms=True, rigidbodies=False, bounds=False)
 
     capture = ImgCaptureModified(avatar_ids=["a"],png=False,image_q=imgQueue)
     # Note the order of add-ons. The Magnebot must be added first so that the camera can look at it.
-    c.add_ons.extend([magnebot, magnebot2, camera, capture])
+    c.add_ons.extend([magnebot, magnebot2, om, camera, capture])
     # c.add_ons.extend([magnebot, magnebot2, camera])
 
 
@@ -115,12 +117,17 @@ def startTDW(imgQueue,prepared,cmds):
 
     '''Control the robot by pick/drop'''
     while True:
-        if len(cmds) == 0:
-            time.sleep(0.1)
-            continue
-        else:
-            cmd = cmds.pop(0)
-            print(f"tdw getting {cmd}")
+        # if len(cmds) == 0:
+        #     time.sleep(0.1)
+        #     continue
+        # else:
+        #     cmd = cmds.pop(0)
+        #     print(f"tdw getting {cmd}")
+        cmd = input("input your commands:")
+        for object_id in om.objects_static:
+                print("object info:")
+                print(object_id, om.objects_static[object_id].name, om.objects_static[object_id].category)
+                print(om.transforms[object_id].position)
         if cmd == "pick apple":
             print("picking")
             magnebot.grasp(apple_id,Arm.right)

@@ -13,7 +13,7 @@
 
 
 
-<body id="{{player}}">
+<body id="player1">
 
   <section class="hero is-small is-success mb-4">
     <div class="hero-body">
@@ -31,18 +31,17 @@
 
       <div class="column is-7" , id="vid">
         <div>
-          <!-- <img src="{{ url_for('video') }}" width="50%" /> -->
-          <img src="{{ url_for('static', filename='test.jpg') }}" width="50%" />
+          <img src="{{ url_for('video1') }}" width="50%" />
         </div>
-        <form action="/?target=command" method="post" enctype="multipart/form-data">
-          <label class="label">Input your Command:</label>
-          <div class="control">
-            <input class="input" type="text" name="text" placeholder="pick/drop [item]">
-          </div><br>
-          <button class="button is-primary" name="comment" value="submit">submit</button>
-        </form>
       </div>
 
+      <!-- <form action="/?target=command" method="post" enctype="multipart/form-data">
+        <label class="label">Input your Command:</label>
+        <div class="control">
+          <input class="input" type="text" name="text" placeholder="pick/drop [item]">
+        </div><br>
+        <button class="button is-primary" name="comment" value="submit">submit</button>
+      </form> -->
 
       <div id="reactEntry">
         Loading ...

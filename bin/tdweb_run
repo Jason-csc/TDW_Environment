@@ -4,8 +4,10 @@
 set -Eeuo pipefail
 set -x
 
+npx webpack
+
 if [ ! -e "var/tdweb.sqlite3" ]; then
-    bin/tdwebdb create
+    bin/tdweb_db create
 fi
 test -e var/tdweb.sqlite3
 export FLASK_ENV=development

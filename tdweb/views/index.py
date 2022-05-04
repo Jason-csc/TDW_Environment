@@ -16,10 +16,25 @@ from tdweb.views.TDW import startTDW
 
 import cv2
 
-camera=[]
-prepared = [False]
+camera1=[]
+camera2=[]
+prepared = [False,False]
 commands = []
 prev = None
+
+
+def dummy_TDW(camera1,camera2,prepared,commands):
+    prepared[1] = True
+    time.sleep(10)
+    print("READY")
+    prepared[0] = True
+    while True:
+        img= (np.random.randint(100,255,(100,100,3))).astype(np.uint8)
+        camera1.append(img)
+        img= (np.random.randint(0,120,(100,100,3))).astype(np.uint8)
+        camera2.append(img)
+
+
 
 # @tdweb.app.route('/',methods=['GET','POST'])
 # def show_index():
@@ -43,38 +58,41 @@ prev = None
 #     return flask.render_template("index.html", **context)
 
 
+
 @tdweb.app.route('/player1/',methods=['GET'])
 def show_player1():
     """Display / route."""
+    if not prepared[1]:
+        thread = threading.Thread(target=dummy_TDW,args=(camera1,camera2,prepared,commands))
+        thread.start()
+    while True:
+        if prepared[0]:
+            break
+        time.sleep(0.1)
     context = {}
-    context["player"] = "player1"
-    return flask.render_template("index.html", **context)
+    return flask.render_template("index1.html", **context)
 
 
 @tdweb.app.route('/player2/',methods=['GET'])
 def show_player2():
     """Display / route."""
+    while True:
+        if prepared[0]:
+            break
+        time.sleep(0.1)
     context = {}
-    context["player"] = "player2"
-    return flask.render_template("index.html", **context)
+    return flask.render_template("index2.html", **context)
 
 
-# def out(c):
-#     i = 0
-#     while True:
-#         i += 1
-#         img= (np.random.randint(0,255,(500,20,3))).astype(np.uint8)
-#         c.append(img)
 
-
-def generate_frames():
+def generate_frames1():
     while True:
         ## read the camera frame
-        success = len(camera) > 0
+        success = len(camera1) > 0
         if not success:
             frame = prev
         else:
-            frame=camera.pop(0)
+            frame=camera1.pop(0)
             tmp = frame[:,:,0].copy()
             frame[:,:,0] = frame[:,:,2]
             frame[:,:,2] = tmp
@@ -87,7 +105,33 @@ def generate_frames():
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
-@tdweb.app.route('/video')
-def video():
-    return Response(generate_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+def generate_frames2():
+    while True:
+        ## read the camera frame
+        success = len(camera2) > 0
+        if not success:
+            frame = prev
+        else:
+            frame=camera2.pop(0)
+            tmp = frame[:,:,0].copy()
+            frame[:,:,0] = frame[:,:,2]
+            frame[:,:,2] = tmp
+            prev = frame
+        
+        ret,buffer=cv2.imencode('.jpg',frame)
+        frame=buffer.tobytes()
+
+        yield(b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+@tdweb.app.route('/video1')
+def video1():
+    return Response(generate_frames1(),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@tdweb.app.route('/video2')
+def video2():
+    return Response(generate_frames2(),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 
