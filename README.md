@@ -1,13 +1,33 @@
-# TDW_Environment
-Simulated Environment using ThreeDWorld ([TDW](https://github.com/threedworld-mit/tdw))
+# TDWEB - TDW Web Interface for Interaction Collection
+Simulated Environment for human-robot interaction using ThreeDWorld ([TDW](https://github.com/threedworld-mit/tdw)). On the Web Page:
+- Players can control the robot from the first perspective
+- Click objects listed to pick the item and place in the bowl
+- Chat with partner for collaborative tasks
 
 ## Set up
-Intall TDW: **`pip3 install tdw --user`**
+Python tools and third party packages Installation: 
+```bash
+./bin/tdweb_install
+```
 
-Install Magnet: **`pip3 install magnebot`**
+* Make sure to activate virtual environment:  
+```bash
+source env/bin/activate
+```
+
+Database Management through: 
+```bash
+./bin/tdweb_db (create|destroy|reset|dump)
+```
 
 
-## Run Demo
-Run the demo: **`python demo.py`**
+## Interactive Website
+Open one terminal and run: 
+```bash
+./bin/tdweb_run
+```
 
-Interaction with commands: **`pick apple`**, **`drop`**
+*Refer [Install TDW on a remote Linux server](https://github.com/threedworld-mit/tdw/blob/master/Documentation/lessons/setup/install.md#install-tdw-on-a-remote-linux-server) and modify `DISPLAY` in `bin/tdweb_display`*. Open another terminal:
+```bash
+./bin/tdweb_display
+```

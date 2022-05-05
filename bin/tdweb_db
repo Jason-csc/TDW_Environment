@@ -6,7 +6,7 @@ set -x
 
 # Sanity check command line options
 usage() {
-  echo "Usage: $0 (create|destroy|reset|dump|random)"
+  echo "Usage: $0 (create|destroy|reset|dump)"
 }
 
 if [ $# -ne 1 ]; then
