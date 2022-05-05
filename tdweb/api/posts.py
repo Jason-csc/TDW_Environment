@@ -50,3 +50,30 @@ def get_chats():
     # print(context)
     return flask.jsonify(**context), 200
 
+
+@tdweb.app.route('/api/v1/objlist/', methods=['GET'])
+def get_obj():    
+    connection = tdweb.model.get_db()
+    cur = connection.execute(
+        "SELECT *" +
+        "FROM objList; " 
+    ).fetchall()
+    context = {"obj":[]}
+    player = flask.request.args.get("player")
+    for res in cur:
+        if player == "player1":
+            if res["reachable1"]:
+                res["reachable"] = res["reachable1"]
+                res.pop("reachable1")
+                res.pop("reachable2")
+                context["obj"].append(res)
+        elif player == "player2":
+            if res["reachable2"]:
+                res["reachable"] = res["reachable2"]
+                res.pop("reachable1")
+                res.pop("reachable2")
+                context["obj"].append(res)
+        else:
+            raise RuntimeError("Error: wrong playerid")
+    # print("Returning context", context)
+    return flask.jsonify(**context), 200

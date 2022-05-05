@@ -6,3 +6,17 @@ CREATE TABLE chats (
     text VARCHAR(1024) NOT NULL,
     created DATETIME(2) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE TABLE objList (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    objectname VARCHAR(30) NOT NULL,
+    objectid INTEGER NOT NULL,
+    x FLOAT(3) NOT NULL,
+    y FLOAT(3) NOT NULL,
+    z FLOAT(3) NOT NULL,
+    reachable1 BOOLEAN NOT NULL,
+    reachable2 BOOLEAN NOT NULL
+);
+
+

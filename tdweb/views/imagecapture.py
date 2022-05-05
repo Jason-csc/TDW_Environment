@@ -42,7 +42,7 @@ class ImgCaptureModified(AddOn):
     # A list of valid pass masks.
     _PASS_MASKS: List[str] = list(Images.PASS_MASKS.values())
 
-    def __init__(self, path: Union[str, Path]=None, avatar_ids: List[str] = None, png: bool = False, pass_masks: List[str] = None, image_q = None):
+    def __init__(self, path: Union[str, Path]=None, avatar_ids: List[str] = None, png: bool = False, pass_masks: List[str] = None, image_q1 = None, image_q2 = None):
         """
         :param path: The path to the output directory.
         :param avatar_ids: The IDs of the avatars that will capture and save images. If empty, all avatars will capture and save images. Note that these avatars must already exist in the scene (if you've added the avatars via a [`ThirdPersonCamera` add-on](third_person_camera.md), you must add the `ThirdPersonCamera` first, *then* `ImageCapture`).
@@ -86,7 +86,8 @@ class ImgCaptureModified(AddOn):
         self.images: Dict[str, Images] = dict()
         
         """Add Image queue"""
-        self.image_q = image_q
+        self.image_q1 = image_q1
+        self.image_q2 = image_q2
 
     def get_initialization_commands(self) -> List[dict]:
         commands = [{"$type": "set_img_pass_encoding",
@@ -114,8 +115,13 @@ class ImgCaptureModified(AddOn):
                     # if not output_dir.exists():
                     #     output_dir.mkdir(parents=True)
                     latest_frame = self.get_pil_images()
-                    frame = numpy.array(latest_frame['a']['_img'])
-                    self.image_q.append(frame)
+                    frame = numpy.array(latest_frame[a]['_img'])
+                    if a == 'a':
+                        self.image_q1.append(frame)
+                    elif a == 'b':
+                        self.image_q2.append(frame)
+                    else:
+                        raise RuntimeError("Error: avatar_ids should be a or b")
                     # cv2.imshow('Interactive Window',frame)
                     # cv2.waitKey(1)
         if got_images:

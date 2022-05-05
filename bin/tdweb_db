@@ -31,6 +31,7 @@ case $1 in
 
   "dump")
     sqlite3 -batch -line var/tdweb.sqlite3 'SELECT * FROM chats'
+    sqlite3 -batch -line var/tdweb.sqlite3 'SELECT * FROM objList'
     ;;
 
   

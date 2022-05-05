@@ -11,64 +11,78 @@ import threading
 import numpy as np
 import time
 
-from tdweb.views.TDW import startTDW
-
+# from tdweb.views.TDW import startTDW
+from tdweb.views.MultiTDW import startMultiTDW
 
 import cv2
 
-camera1=[]
-camera2=[]
-prepared = [False,False]
-commands = []
-prev = None
+info = {}
+info["start"] = False
+info["prepared"] = False
+info["camera1"] = []
+info["camera2"] = []
+info["cmds1"] = []
+info["cmds2"] = []
+info["objNeedUpdate"] = None
+info["objList"] = {}
+
+prev1 = None
+prev2 = None
 
 
-def dummy_TDW(camera1,camera2,prepared,commands):
-    prepared[1] = True
+
+import random
+def dummy_addcmds1(info):
+    #TO BE FIXED: call by buttom to add cmds
+    print("INPUTTING PICK APPLE ")
     time.sleep(10)
-    print("READY")
-    prepared[0] = True
-    while True:
-        img= (np.random.randint(100,255,(100,100,3))).astype(np.uint8)
-        camera1.append(img)
-        img= (np.random.randint(0,120,(100,100,3))).astype(np.uint8)
-        camera2.append(img)
-
-
-
-# @tdweb.app.route('/',methods=['GET','POST'])
-# def show_index():
-#     """Display / route."""
-#     context = {}
-#     # target = flask.request.args.get("target",default=None)
-#     # if target is None:       
+    info["cmds1"].append(999)
         
-#     #     thread = threading.Thread(target=startTDW,args=(camera,prepared,commands))
-#     #     thread.start()
+    
+def dummy_addcmds2(info):
+    return 0
+    # while True:
+    #     # if len(info["cmds2"]) == 0:
+    #     #     info["cmds2"].append(random.choice((1,2,1.5)))
+    #     # time.sleep(10)
 
-#     #     while True:
-#     #         if prepared[0]:
-#     #             break
-#     #         time.sleep(0.1)
-#     # else:
-#     #     command = flask.request.form['text']
-#     #     print("get command",command)
-#     #     commands.append(command)
 
-#     return flask.render_template("index.html", **context)
+def updateDB(info):
+    while True:
+        if info["objNeedUpdate"]:
+            with tdweb.app.app_context():
+                connection = tdweb.model.get_db()
+                connection.execute("DELETE FROM objList; ")
+                for object_id,objt in info["objList"].items():
+                    connection.execute(
+                        "INSERT INTO objList(objectname,objectid,x,y,z,reachable1,reachable2) VALUES "+
+                        "(?,?,?,?,?,?,?)",
+                        (objt["name"],object_id,objt["position"][0],objt["position"][1],objt["position"][2],objt["reachable1"],objt["reachable2"])
+                    )
+                info["objNeedUpdate"] = False
+        time.sleep(1)
+
+
 
 
 
 @tdweb.app.route('/player1/',methods=['GET'])
 def show_player1():
     """Display / route."""
-    if not prepared[1]:
-        thread = threading.Thread(target=dummy_TDW,args=(camera1,camera2,prepared,commands))
+    if not info["start"]:
+        thread = threading.Thread(target=startMultiTDW,args=(info,))
         thread.start()
+        thread = threading.Thread(target=dummy_addcmds1,args=(info,))
+        thread.start()
+        thread = threading.Thread(target=dummy_addcmds2,args=(info,))
+        thread.start()
+        # TO be fixed: DUMMY ADD CMD
     while True:
-        if prepared[0]:
+        if info["prepared"]:
             break
         time.sleep(0.1)
+    thread = threading.Thread(target=updateDB,args=(info,))
+    thread.start()
     context = {}
     return flask.render_template("index1.html", **context)
 
@@ -77,7 +91,7 @@ def show_player1():
 def show_player2():
     """Display / route."""
     while True:
-        if prepared[0]:
+        if info["prepared"]:
             break
         time.sleep(0.1)
     context = {}
@@ -86,17 +100,17 @@ def show_player2():
 
 
 def generate_frames1():
+    global prev1
     while True:
-        ## read the camera frame
-        success = len(camera1) > 0
-        if not success:
-            frame = prev
+        ## read the camera frame1
+        if len(info["camera1"]) == 0:
+            frame = prev1
         else:
-            frame=camera1.pop(0)
+            frame=info["camera1"].pop(0)
             tmp = frame[:,:,0].copy()
             frame[:,:,0] = frame[:,:,2]
             frame[:,:,2] = tmp
-            prev = frame
+            prev1 = frame
         
         ret,buffer=cv2.imencode('.jpg',frame)
         frame=buffer.tobytes()
@@ -106,23 +120,25 @@ def generate_frames1():
 
 
 def generate_frames2():
+    global prev2
     while True:
-        ## read the camera frame
-        success = len(camera2) > 0
-        if not success:
-            frame = prev
+        ## read the camera frame2
+        if len(info["camera2"]) == 0:
+            frame = prev2
         else:
-            frame=camera2.pop(0)
+            frame=info["camera2"].pop(0)
             tmp = frame[:,:,0].copy()
             frame[:,:,0] = frame[:,:,2]
             frame[:,:,2] = tmp
-            prev = frame
+            prev2 = frame
         
         ret,buffer=cv2.imencode('.jpg',frame)
         frame=buffer.tobytes()
 
         yield(b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
 
 @tdweb.app.route('/video1')
 def video1():

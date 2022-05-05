@@ -24,22 +24,27 @@ import time
 #     print(record.name)
 
 
-def startTDW(imgQueue,prepared,cmds=[]):
+def startTDW(info):
+    info["start"] = True
     c = Controller(launch_build=False)
-    magnebot = Magnebot(position={"x": 0, "y": 0, "z": -1.67}, rotation={"x": 0, "y": 0, "z": 0},robot_id=c.get_unique_id())
+    magnebot1 = Magnebot(position={"x": 0, "y": 0, "z": -1.67}, rotation={"x": 0, "y": 0, "z": 0},robot_id=c.get_unique_id())
     magnebot2 = Magnebot(position={"x": 0, "y": 0, "z": 1.67}, rotation={"x": 0, "y": 180, "z": 0},robot_id=c.get_unique_id())
     # Create a camera and enable image capture.
-    camera = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": -1.55},
+    camera1 = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": -1.55},
                             rotation={"x": 30, "y": 0, "z": 0},
                             field_of_view = 100,
                             avatar_id="a")
+    camera2 = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": 1.55},
+                            rotation={"x": 30, "y": 180, "z": 0},
+                            field_of_view = 100,
+                            avatar_id="b")
                             
     om = ObjectManager(transforms=True, rigidbodies=False, bounds=False)
 
-    capture = ImgCaptureModified(avatar_ids=["a"],png=False,image_q=imgQueue)
+    capture = ImgCaptureModified(avatar_ids=["a","b"],png=False,image_q1=info["camera1"],image_q2=info["camera2"])
     # Note the order of add-ons. The Magnebot must be added first so that the camera can look at it.
-    c.add_ons.extend([magnebot, magnebot2, om, camera, capture])
-    # c.add_ons.extend([magnebot, magnebot2, camera])
+    c.add_ons.extend([magnebot1, magnebot2, om, camera1,camera2, capture])
+    # c.add_ons.extend([magnebot1, magnebot2,om, camera])
 
 
     print("Setting Up Scene...")
@@ -74,46 +79,46 @@ def startTDW(imgQueue,prepared,cmds=[]):
                                             object_id=apple_id))
 
 
-    orange_id = c.get_unique_id()
-    commands.extend(c.get_add_physics_object(model_name='b04_orange_00',
-                                        library="models_core.json",
-                                            position={"x": 0.10, "y": 0.8682562, "z": -0.9},
-                                            mass = 3,
-                                            bounciness=1,
-                                            object_id=orange_id))
+    # orange_id = c.get_unique_id()
+    # commands.extend(c.get_add_physics_object(model_name='b04_orange_00',
+    #                                     library="models_core.json",
+    #                                         position={"x": 0.10, "y": 0.8682562, "z": -0.9},
+    #                                         mass = 3,
+    #                                         bounciness=1,
+    #                                         object_id=orange_id))
 
 
-    banana_id = c.get_unique_id()
-    commands.extend(c.get_add_physics_object(model_name='b04_banana',
-                                        library="models_core.json",
-                                            position={"x": 0, "y": 0.8682562, "z": -0.4},
-                                            mass = 3,
-                                            bounciness=1,
-                                            object_id=banana_id))
+    # banana_id = c.get_unique_id()
+    # commands.extend(c.get_add_physics_object(model_name='b04_banana',
+    #                                     library="models_core.json",
+    #                                         position={"x": 0, "y": 0.8682562, "z": -0.4},
+    #                                         mass = 3,
+    #                                         bounciness=1,
+    #                                         object_id=banana_id))
 
-    banana2_id = c.get_unique_id()
-    commands.extend(c.get_add_physics_object(model_name='b04_banana',
-                                        library="models_core.json",
-                                            position={"x": 0.24, "y": 0.8682562, "z": 0.4},
-                                            mass = 3,
-                                            bounciness=1,
-                                            object_id=banana2_id))
+    # banana2_id = c.get_unique_id()
+    # commands.extend(c.get_add_physics_object(model_name='b04_banana',
+    #                                     library="models_core.json",
+    #                                         position={"x": 0.24, "y": 0.8682562, "z": 0.4},
+    #                                         mass = 3,
+    #                                         bounciness=1,
+    #                                         object_id=banana2_id))
 
 
-    apple2_id = c.get_unique_id()
-    commands.extend(c.get_add_physics_object(model_name='apple',
-                                        library="models_core.json",
-                                            position={"x": -0.17, "y": 0.8682562, "z": 0.25},
-                                            mass = 3,
-                                            bounciness=1,
-                                            object_id=apple2_id))
+    # apple2_id = c.get_unique_id()
+    # commands.extend(c.get_add_physics_object(model_name='apple',
+    #                                     library="models_core.json",
+    #                                         position={"x": -0.17, "y": 0.8682562, "z": 0.25},
+    #                                         mass = 3,
+    #                                         bounciness=1,
+    #                                         object_id=apple2_id))
 
     resp = c.communicate(commands)
 
 
 
     print("Starting TDW...")
-    prepared[0] = True
+    info["prepared"] = True
 
     '''Control the robot by pick/drop'''
     while True:
@@ -130,35 +135,31 @@ def startTDW(imgQueue,prepared,cmds=[]):
                 print(om.transforms[object_id].position)
         if cmd == "pick apple":
             print("picking")
-            magnebot.grasp(apple_id,Arm.right)
-            while magnebot.action.status == ActionStatus.ongoing:
+            magnebot1.grasp(apple_id,Arm.right)
+            while magnebot1.action.status == ActionStatus.ongoing:
                 c.communicate([])
             c.communicate([])
-            print(magnebot.action.status)
-            magnebot.reach_for(target={"x": 0.1, "y": 1.3, "z": -1}, arm=Arm.right)
-            while magnebot.action.status == ActionStatus.ongoing:
+            # magnebot1.reach_for(target={"x": 0.1, "y": 1.3, "z": -1}, arm=Arm.right)
+            # while magnebot1.action.status == ActionStatus.ongoing:
+            #     c.communicate([])
+            # c.communicate([])
+            magnebot1.reach_for(target={"x": -0.22, "y": 1.25, "z": -1}, arm=Arm.right)
+            while magnebot1.action.status == ActionStatus.ongoing:
                 c.communicate([])
             c.communicate([])
-        elif cmd == "drop":
-            magnebot.reach_for(target={"x": -0.22, "y": 1.25, "z": -1}, arm=Arm.right)
-            while magnebot.action.status == ActionStatus.ongoing:
+            magnebot1.drop(apple_id,Arm.right)
+            while magnebot1.action.status == ActionStatus.ongoing:
                 c.communicate([])
             c.communicate([])
-            magnebot.drop(apple_id,Arm.right)
-            while magnebot.action.status == ActionStatus.ongoing:
+            magnebot1.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
+            while magnebot1.action.status == ActionStatus.ongoing:
                 c.communicate([])
             c.communicate([])
-            # print(magnebot.action.status)
-            magnebot.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
-            while magnebot.action.status == ActionStatus.ongoing:
+            magnebot1.reset_arm(arm=Arm.right)
+            while magnebot1.action.status == ActionStatus.ongoing:
                 c.communicate([])
             c.communicate([])
-            # print(magnebot.action.status)
-            magnebot.reset_arm(arm=Arm.right)
-            while magnebot.action.status == ActionStatus.ongoing:
-                c.communicate([])
-            c.communicate([])
-            print(magnebot.action.status)
+            print(magnebot1.action.status)
         else:
             c.communicate({"$type": "terminate"})
             break

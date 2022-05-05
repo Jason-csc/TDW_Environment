@@ -11,13 +11,15 @@ class Post extends React.Component {
             chats: [],
             num: 0,
             value: '',
+            obj: [],
         };
         this.handleNewComment = this.handleNewComment.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidMount() {
-        this.setChecker = setInterval(this.checkdbchat.bind(this), 200);
+        this.setChecker = setInterval(this.checkdbchat.bind(this), 300);
+        this.setChecker2 = setInterval(this.checkdbobj.bind(this), 400);
         const { url } = this.props;
         fetch(url, { credentials: 'same-origin' })
             .then((response) => {
@@ -28,8 +30,25 @@ class Post extends React.Component {
                 this.setState({
                     chats: data.chats,
                     num: data.num,
-                    value: ''
+                    value: '',
+                    obj: []
                 });
+            })
+            .catch((error) => console.log(error));
+    }
+
+    checkdbobj() {
+        const { url2 } = this.props;
+        fetch(`${url2}?player=${document.body.id}`, { credentials: 'same-origin' })
+            .then((response) => {
+                if (!response.ok) throw Error(response.statusText);
+                return response.json();
+            })
+            .then((data) => {
+                this.setState({
+                    obj: data.obj
+                });
+                console.log(data);
             })
             .catch((error) => console.log(error));
     }
@@ -51,8 +70,6 @@ class Post extends React.Component {
                 }
             })
             .catch((error) => console.log(error));
-
-
     }
 
     handleNewComment(event) {
@@ -87,11 +104,24 @@ class Post extends React.Component {
 
 
     render() {
-        const { chats, value } = this.state;
-        const video_url = 'video_' + document.body.id;
-        console.log(video_url);
+        const { chats, value, obj } = this.state;
         return (
-            <div class="column">
+            <div>
+                <div class="box">
+                    <div style={{ height: '250px', overflowY: 'auto'}}>
+                    <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Objects:</label>
+                        {
+                            obj.map((object) => (
+                                <div class="buttons" key={object.id}>
+                                    <button class="button is-link is-outlined">
+                                        {object.objectname} {object.objectid}  {object.reachable}  {object.x}
+                                    </button>
+                                </div>
+                            ))
+                        }
+                        </div>
+                </div>
+
                 <div class="box">
                     <div class="field">
                         <label class="label" style={{ fontSize: '2vw', width: '500px' }}>Chat box</label>
@@ -130,6 +160,7 @@ class Post extends React.Component {
 
 
 Post.propTypes = {
+    url: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
 };
 
