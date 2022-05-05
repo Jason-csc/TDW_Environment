@@ -31,7 +31,7 @@ class Post extends React.Component {
                     chats: data.chats,
                     num: data.num,
                     value: '',
-                    obj: []
+                    obj: [],
                 });
             })
             .catch((error) => console.log(error));
@@ -105,6 +105,7 @@ class Post extends React.Component {
 
     render() {
         const { chats, value, obj } = this.state;
+        const button_url = `/control/${document.body.id}/`;
         return (
             <div>
                 <div class="box">
@@ -113,9 +114,12 @@ class Post extends React.Component {
                         {
                             obj.map((object) => (
                                 <div class="buttons" key={object.id}>
-                                    <button class="button is-link is-outlined">
-                                        {object.objectname} {object.objectid}  {object.reachable}  {object.x}
-                                    </button>
+                                    <form action={button_url} method="post" enctype="multipart/form-data">
+                                        <input type="hidden" name="objectid" value={object.objectid}/>
+                                        <button class="button is-link is-outlined">
+                                            {object.objectname} {object.objectid}  {object.reachable}  {object.x}
+                                        </button>
+                                    </form>
                                 </div>
                             ))
                         }

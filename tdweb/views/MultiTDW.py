@@ -197,7 +197,7 @@ class MultiMagnebot(Controller):
                                                 ))
 
         apple_id = self.get_unique_id()
-        apple_id = 999 # TO BE DELETED
+        # self.info["cmds1"].append(apple_id)  # TO BE DELETED
         commands.extend(self.get_add_physics_object(model_name='apple',
                                             library="models_core.json",
                                                 position={"x": 0.2, "y": 0.8682562, "z": -1.1},

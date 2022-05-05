@@ -3,6 +3,7 @@ tdwebindex (main) view.
 URLs include:
 /
 """
+from crypt import methods
 from queue import Queue
 import flask
 from flask import Flask,render_template,Response
@@ -31,20 +32,20 @@ prev2 = None
 
 
 
-import random
-def dummy_addcmds1(info):
-    #TO BE FIXED: call by buttom to add cmds
-    print("INPUTTING PICK APPLE ")
-    time.sleep(10)
-    info["cmds1"].append(999)
+# import random
+# def dummy_addcmds1(info):
+#     #TO BE FIXED: call by buttom to add cmds
+#     print("INPUTTING PICK APPLE ")
+#     time.sleep(10)
+#     info["cmds1"].append(999)
         
     
-def dummy_addcmds2(info):
-    return 0
-    # while True:
-    #     # if len(info["cmds2"]) == 0:
-    #     #     info["cmds2"].append(random.choice((1,2,1.5)))
-    #     # time.sleep(10)
+# def dummy_addcmds2(info):
+#     return 0
+#     # while True:
+#     #     # if len(info["cmds2"]) == 0:
+#     #     #     info["cmds2"].append(random.choice((1,2,1.5)))
+#     #     # time.sleep(10)
 
 
 def updateDB(info):
@@ -71,10 +72,6 @@ def show_player1():
     """Display / route."""
     if not info["start"]:
         thread = threading.Thread(target=startMultiTDW,args=(info,))
-        thread.start()
-        thread = threading.Thread(target=dummy_addcmds1,args=(info,))
-        thread.start()
-        thread = threading.Thread(target=dummy_addcmds2,args=(info,))
         thread.start()
         # TO be fixed: DUMMY ADD CMD
     while True:
@@ -151,3 +148,19 @@ def video2():
 
 
 
+@tdweb.app.route('/control/<player>/',methods=['POST'])
+def send_control(player):
+    objectid = flask.request.form.get('objectid')
+    if objectid is None:
+        flask.abort(404)
+    objectid = int(objectid)
+    if player == "player1":
+        print("="*10)
+        print("SENDDING ",objectid)
+        print("="*10)
+        info["cmds1"].append(objectid)
+    elif player == "player2":
+        info["cmds2"].append(objectid)
+    else:
+        flask.abort(404)
+    return flask.redirect(flask.url_for(f"show_{player}"))
