@@ -12,20 +12,11 @@ import threading
 import numpy as np
 import time
 
-# from tdweb.views.TDW import startTDW
-from tdweb.views.MultiTDW import startMultiTDW
+from tdweb.tdwHandler.MultiTDW import startMultiTDW
+from tdweb import metadata as info
 
 import cv2
 
-info = {}
-info["start"] = False
-info["prepared"] = False
-info["camera1"] = []
-info["camera2"] = []
-info["cmds1"] = []
-info["cmds2"] = []
-info["objNeedUpdate"] = None
-info["objList"] = {}
 
 prev1 = None
 prev2 = None
@@ -48,23 +39,6 @@ prev2 = None
 #     #     # time.sleep(10)
 
 
-def updateDB(info):
-    while True:
-        if info["objNeedUpdate"]:
-            with tdweb.app.app_context():
-                connection = tdweb.model.get_db()
-                connection.execute("DELETE FROM objList; ")
-                for object_id,objt in info["objList"].items():
-                    connection.execute(
-                        "INSERT INTO objList(objectname,objectid,x,y,z,reachable1,reachable2) VALUES "+
-                        "(?,?,?,?,?,?,?)",
-                        (objt["name"],object_id,objt["position"][0],objt["position"][1],objt["position"][2],objt["reachable1"],objt["reachable2"])
-                    )
-                info["objNeedUpdate"] = False
-        time.sleep(1)
-
-
-
 
 
 @tdweb.app.route('/player1/',methods=['GET'])
@@ -78,8 +52,6 @@ def show_player1():
         if info["prepared"]:
             break
         time.sleep(0.1)
-    thread = threading.Thread(target=updateDB,args=(info,))
-    thread.start()
     context = {}
     return flask.render_template("index1.html", **context)
 
@@ -148,19 +120,19 @@ def video2():
 
 
 
-@tdweb.app.route('/control/<player>/',methods=['POST'])
-def send_control(player):
-    objectid = flask.request.form.get('objectid')
-    if objectid is None:
-        flask.abort(404)
-    objectid = int(objectid)
-    if player == "player1":
-        print("="*10)
-        print("SENDDING ",objectid)
-        print("="*10)
-        info["cmds1"].append(objectid)
-    elif player == "player2":
-        info["cmds2"].append(objectid)
-    else:
-        flask.abort(404)
-    return flask.redirect(flask.url_for(f"show_{player}"))
+# @tdweb.app.route('/control/<player>/',methods=['POST'])
+# def send_control(player):
+#     objectid = flask.request.form.get('objectid')
+#     if objectid is None:
+#         flask.abort(404)
+#     objectid = int(objectid)
+#     if player == "player1":
+#         print("="*10)
+#         print("SENDDING ",objectid)
+#         print("="*10)
+#         info["cmds1"].append(objectid)
+#     elif player == "player2":
+#         info["cmds2"].append(objectid)
+#     else:
+#         flask.abort(404)
+#     return flask.redirect(flask.url_for(f"show_{player}"))

@@ -105,7 +105,6 @@ class Post extends React.Component {
 
     render() {
         const { chats, value, obj } = this.state;
-        const button_url = `/control/${document.body.id}/`;
         return (
             <div>
                 <div class="box">
@@ -113,11 +112,12 @@ class Post extends React.Component {
                     <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Objects:</label>
                         {
                             obj.map((object) => (
-                                <div class="buttons" key={object.id}>
-                                    <form action={button_url} method="post" enctype="multipart/form-data">
-                                        <input type="hidden" name="objectid" value={object.objectid}/>
+                                <div class="buttons" key={object.objectId}>
+                                    <form action="/api/v1/sendcmd/" method="post" enctype="multipart/form-data">
+                                        <input type="hidden" name="objectid" value={object.objectId}/>
+                                        <input type="hidden" name="player" value={document.body.id}/>
                                         <button class="button is-link is-outlined">
-                                            {object.objectname} {object.objectid}  {object.reachable}  {object.x}
+                                            {object.objectName} {object.objectId} {object.x}
                                         </button>
                                     </form>
                                 </div>

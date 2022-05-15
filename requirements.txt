@@ -39,5 +39,5 @@ urllib3==1.26.7
 Werkzeug==2.0.1
 wrapt==1.12.1
 opencv-python
-tdw==1.9.14.0
+tdw
 magnebot

@@ -4,7 +4,7 @@ from tdw.add_ons.third_person_camera import ThirdPersonCamera
 # from tdw.add_ons.image_capture import ImageCapture
 from magnebot import Magnebot, ActionStatus, Arm
 from tdw.librarian import ModelLibrarian
-from tdweb.views.imagecapture import ImgCaptureModified
+from tdweb.tdwHandler.imagecapture import ImgCaptureModified
 from tdw.add_ons.object_manager import ObjectManager
 
 import numpy as np
@@ -130,11 +130,12 @@ class MultiMagnebot(Controller):
         
         commands = self.setUp()
         self.communicate(commands)
+        print("finish communicate")
         
         #Initialize object db
         self.getOBJ()
+        print("finish get obj")
         self.info["prepared"] = True
-        self.info["objNeedUpdate"] = True
 
         thread = threading.Thread(target=self.updateOBJ,args=())
         thread.start()
@@ -151,6 +152,7 @@ class MultiMagnebot(Controller):
         for object_id,objt in self.objManager.objects_static.items():
             tmp = {}
             tmp["name"] = objt.name
+            # update
             tmp["position"] = self.objManager.transforms[object_id].position
             tmp["reachable1"] = True
             tmp["reachable2"] = True
@@ -164,9 +166,6 @@ class MultiMagnebot(Controller):
             if not self.objupdated[0]:
                 self.getOBJ()               
                 self.objupdated[0] = True
-                self.info["objNeedUpdate"] = True
-                print("=====UpdateOBJ thread: need to update objdb!!!===")
-                print(5*"=\n")
             time.sleep(0.1)
                 
                 

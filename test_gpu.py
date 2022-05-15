@@ -4,6 +4,10 @@ import tqdm
 Image capture benchmarks.
 """
 
+'''
+Compare to https://github.com/threedworld-mit/tdw/blob/master/Documentation/benchmark/benchmark.md
+'''
+
 print("start")
 output = "| 100 objects | Pass masks | Render quality | Post-processing | Screen size | .png | FPS |" \
          "\n| --- | --- | --- | --- | --- | --- | --- |\n"

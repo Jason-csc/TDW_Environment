@@ -1,6 +1,7 @@
 """REST API for posts."""
 import flask
 import tdweb
+from tdweb import metadata as info
 
 
 class InvalidUsage(Exception):
@@ -53,27 +54,43 @@ def get_chats():
 
 @tdweb.app.route('/api/v1/objlist/', methods=['GET'])
 def get_obj():    
-    connection = tdweb.model.get_db()
-    cur = connection.execute(
-        "SELECT *" +
-        "FROM objList; " 
-    ).fetchall()
     context = {"obj":[]}
     player = flask.request.args.get("player")
-    for res in cur:
+    for objectid,res in info["objList"].items():
+        tmp = {}
+        tmp["objectId"] = objectid
+        tmp["objectName"] = res["name"]
+        tmp["x"] = res["position"][0]
+        tmp["y"] = res["position"][1]
+        tmp["z"] = res["position"][2]
         if player == "player1":
-            if res["reachable1"]:
-                res["reachable"] = res["reachable1"]
-                res.pop("reachable1")
-                res.pop("reachable2")
-                context["obj"].append(res)
+            tmp["reachable"] = res["reachable1"]
+            context["obj"].append(tmp)
         elif player == "player2":
-            if res["reachable2"]:
-                res["reachable"] = res["reachable2"]
-                res.pop("reachable1")
-                res.pop("reachable2")
-                context["obj"].append(res)
+            tmp["reachable"] = res["reachable2"]
+            context["obj"].append(tmp)
         else:
             raise RuntimeError("Error: wrong playerid")
-    # print("Returning context", context)
     return flask.jsonify(**context), 200
+
+
+
+
+
+@tdweb.app.route('/api/v1/sendcmd/',methods=['POST'])
+def send_control():
+    objectid = flask.request.form.get('objectid')
+    player = flask.request.form.get('player')
+    if objectid is None or player is None:
+        flask.abort(404)
+    objectid = int(objectid)
+    if player == "player1":
+        print("="*10)
+        print("SENDDING ",objectid)
+        print("="*10)
+        info["cmds1"].append(objectid)
+    elif player == "player2":
+        info["cmds2"].append(objectid)
+    else:
+        flask.abort(404)
+    return flask.jsonify({}), 200

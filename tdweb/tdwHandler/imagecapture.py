@@ -116,12 +116,13 @@ class ImgCaptureModified(AddOn):
                     #     output_dir.mkdir(parents=True)
                     latest_frame = self.get_pil_images()
                     frame = numpy.array(latest_frame[a]['_img'])
-                    if a == 'a':
-                        self.image_q1.append(frame)
-                    elif a == 'b':
-                        self.image_q2.append(frame)
-                    else:
-                        raise RuntimeError("Error: avatar_ids should be a or b")
+                    if self.frame%2 == 0:
+                        if a == 'a':
+                            self.image_q1.append(frame)
+                        elif a == 'b':
+                            self.image_q2.append(frame)
+                        else:
+                            raise RuntimeError("Error: avatar_ids should be a or b")
                     # cv2.imshow('Interactive Window',frame)
                     # cv2.waitKey(1)
         if got_images:
