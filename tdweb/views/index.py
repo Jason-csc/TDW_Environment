@@ -13,7 +13,7 @@ import numpy as np
 import time
 
 from tdweb.tdwHandler.MultiTDW import startMultiTDW
-from tdweb import metadata as info
+from tdweb import metadata as metadata
 
 import cv2
 
@@ -24,18 +24,18 @@ prev2 = None
 
 
 # import random
-# def dummy_addcmds1(info):
+# def dummy_addcmds1(metadata):
 #     #TO BE FIXED: call by buttom to add cmds
 #     print("INPUTTING PICK APPLE ")
 #     time.sleep(10)
-#     info["cmds1"].append(999)
+#     metadata["cmds1"].append(999)
         
     
-# def dummy_addcmds2(info):
+# def dummy_addcmds2(metadata):
 #     return 0
 #     # while True:
-#     #     # if len(info["cmds2"]) == 0:
-#     #     #     info["cmds2"].append(random.choice((1,2,1.5)))
+#     #     # if len(metadata["cmds2"]) == 0:
+#     #     #     metadata["cmds2"].append(random.choice((1,2,1.5)))
 #     #     # time.sleep(10)
 
 
@@ -44,12 +44,12 @@ prev2 = None
 @tdweb.app.route('/player1/',methods=['GET'])
 def show_player1():
     """Display / route."""
-    if not info["start"]:
-        thread = threading.Thread(target=startMultiTDW,args=(info,))
+    if not metadata["start"]:
+        thread = threading.Thread(target=startMultiTDW,args=(metadata,))
         thread.start()
         # TO be fixed: DUMMY ADD CMD
     while True:
-        if info["prepared"]:
+        if metadata["prepared"]:
             break
         time.sleep(0.1)
     context = {}
@@ -60,7 +60,7 @@ def show_player1():
 def show_player2():
     """Display / route."""
     while True:
-        if info["prepared"]:
+        if metadata["prepared"]:
             break
         time.sleep(0.1)
     context = {}
@@ -72,10 +72,10 @@ def generate_frames1():
     global prev1
     while True:
         ## read the camera frame1
-        if len(info["camera1"]) == 0:
+        if len(metadata["camera1"]) == 0:
             frame = prev1
         else:
-            frame=info["camera1"].pop(0)
+            frame=metadata["camera1"].pop(0)
             tmp = frame[:,:,0].copy()
             frame[:,:,0] = frame[:,:,2]
             frame[:,:,2] = tmp
@@ -92,10 +92,10 @@ def generate_frames2():
     global prev2
     while True:
         ## read the camera frame2
-        if len(info["camera2"]) == 0:
+        if len(metadata["camera2"]) == 0:
             frame = prev2
         else:
-            frame=info["camera2"].pop(0)
+            frame=metadata["camera2"].pop(0)
             tmp = frame[:,:,0].copy()
             frame[:,:,0] = frame[:,:,2]
             frame[:,:,2] = tmp
@@ -130,9 +130,9 @@ def video2():
 #         print("="*10)
 #         print("SENDDING ",objectid)
 #         print("="*10)
-#         info["cmds1"].append(objectid)
+#         metadata["cmds1"].append(objectid)
 #     elif player == "player2":
-#         info["cmds2"].append(objectid)
+#         metadata["cmds2"].append(objectid)
 #     else:
 #         flask.abort(404)
 #     return flask.redirect(flask.url_for(f"show_{player}"))

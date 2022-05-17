@@ -1,7 +1,7 @@
 """REST API for posts."""
 import flask
 import tdweb
-from tdweb import metadata as info
+from tdweb import metadata as metadata
 
 
 class InvalidUsage(Exception):
@@ -56,7 +56,7 @@ def get_chats():
 def get_obj():    
     context = {"obj":[]}
     player = flask.request.args.get("player")
-    for objectid,res in info["objList"].items():
+    for objectid,res in metadata["objList"].items():
         tmp = {}
         tmp["objectId"] = objectid
         tmp["objectName"] = res["name"]
@@ -74,23 +74,34 @@ def get_obj():
     return flask.jsonify(**context), 200
 
 
-
+@tdweb.app.route('/api/v1/poslist/', methods=['GET'])
+def get_pos():    
+    context = {"positions":[]}
+    player = flask.request.args.get("player")
+    if player == "player1":
+        for tmp in metadata["placePos1"]:
+            context["pos"].append(tmp)
+    elif player == "player2":
+        for tmp in metadata["placePos2"]:
+            context["pos"].append(tmp)
+    else:
+        raise RuntimeError("Error: wrong playerid")
+    return flask.jsonify(**context), 200
 
 
 @tdweb.app.route('/api/v1/sendcmd/',methods=['POST'])
 def send_control():
-    objectid = flask.request.form.get('objectid')
+    args = flask.request.form.get('args')
     player = flask.request.form.get('player')
-    if objectid is None or player is None:
+    cmd = flask.request.form.get('cmd')
+    if cmd is None or args is None or player is None:
         flask.abort(404)
-    objectid = int(objectid)
+    command = {"type": cmd, "args": args}
     if player == "player1":
-        print("="*10)
-        print("SENDDING ",objectid)
-        print("="*10)
-        info["cmds1"].append(objectid)
+        metadata["cmds1"].append(command)
+        # metadata["cmds1"].append({"type": "drop", "args": {"x": -0.3, "y": 0.85, "z": -1}})
     elif player == "player2":
-        info["cmds2"].append(objectid)
+        metadata["cmds2"].append(command)
     else:
         flask.abort(404)
-    return flask.jsonify({}), 200
+    return flask.redirect(flask.url_for(f"show_{player}"))

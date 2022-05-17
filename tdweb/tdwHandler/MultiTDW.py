@@ -38,13 +38,11 @@ class PDRobot(Magnebot):
             rotation: Dict[str, float] = None,
             posBowl: Dict[str, float] = None,
             cmds: List[int] = None):
-        # We're not using images in this simulation.
         super().__init__(robot_id=robot_id, position=position, rotation=rotation)
-        # This will be set within self.update()
-
+        self.cmd = None
         self.state = State.initializing
         self.id = robot_id
-        self.objList = cmds
+        self.cmdList = cmds
         self.posBowl = posBowl
         self.objID = None
         self.objupdated_ = objupdated_
@@ -54,43 +52,48 @@ class PDRobot(Magnebot):
         Pick object based on objectID and drop into bowl (posBowl)
         """
         super().on_send(resp=resp)
-        print("====State==== ",self.state)
-        if self.state == State.initializing and len(self.objList) > 0:
-            self.objID = self.objList.pop(0)
-            self.grasp(self.objID,Arm.right)
-            self.state = State.grasp
+        print(f"====State {self.id} {self.state} ====")
+        print(self.cmdList)
+        if self.cmd is None and len(self.cmdList) > 0:
+            self.cmd = self.cmdList.pop(0)
+            if self.cmd["type"] == "pick":
+                self.objID = int(self.cmd["args"])
+                self.grasp(self.objID, Arm.right)
+                self.state = State.grasp
+            elif self.cmd["type"] == "drop":
+                drop_pos = self.cmd["args"]
+                # TO BE FIXED: hard coded
+                # drop_pos = {"x": -0.22, "y": 1.25, "z": -1}
+                self.reach_for(target={
+                                "x": drop_pos["x"], 
+                                "y": drop_pos["y"]+0.4, 
+                                "z": drop_pos["z"]
+                                }, 
+                                arm=Arm.right)       
+                self.state = State.grasp_back
             self.objupdated_[0] = False
-        elif self.state == State.grasp and self.action.done:
-            #TO BE FIXED: hard coded 
-            self.reach_for(target={"x": -0.22, "y": 1.25, "z": -1}, arm=Arm.right)            
-            self.state = State.grasp_back
-            self.objupdated_[0] = False
-        elif self.state == State.grasp_back and self.action.done:
-            self.drop(self.objID,Arm.right)
-            self.state = State.drop
-        elif self.state == State.drop and self.action.done:
-            #TO BE FIXED: hard coded 
-            self.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
-            self.state = State.drop_back
-            self.objupdated_[0] = False
-        elif self.state == State.drop_back and self.action.done:
-            self.reset_arm(arm=Arm.right)
-            self.state = State.reset
-        elif self.state == State.reset and self.action.done:
-            self.state = State.initializing
+        elif not self.cmd is None:
+            if self.cmd["type"] == "pick":
+                if self.state == State.grasp and self.action.done:
+                    self.state = State.initializing
+                    self.cmd = None
+            elif self.cmd["type"] == "drop":
+                if self.state == State.grasp_back and self.action.done:
+                    self.drop(self.objID,Arm.right)
+                    self.state = State.drop
+                elif self.state == State.drop and self.action.done:
+                    #TO BE FIXED: hard coded 
+                    self.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
+                    self.state = State.drop_back
+                    self.objupdated_[0] = False
+                elif self.state == State.drop_back and self.action.done:
+                    self.reset_arm(arm=Arm.right)
+                    self.state = State.reset
+                elif self.state == State.reset and self.action.done:
+                    self.state = State.initializing
+                    self.objID = None
+                    self.cmd = None
 
-        """
-        DUMMY ACTION
-        """
-        # if self.state == State.initializing and len(self.objList) > 0:
-        #     self.objID = self.objList.pop(0)
-        #     self.move_by(self.objID)
-        #     self.state = State.grasp
-        # elif self.state == State.grasp and self.action.done:
-        #     self.move_by(-self.objID)
-        #     self.state = State.grasp_back
-        # elif self.state == State.grasp_back and self.action.done:
-        #     self.state = State.initializing
 
 
 
@@ -182,28 +185,43 @@ class MultiMagnebot(Controller):
         commands.extend(self.get_add_physics_object(model_name='quatre_dining_table',
                                             #  library="models_core.json",
                                                 position={"x": 0, "y": 0, "z": 0},
+                                                kinematic = True,
                                                 object_id=self.get_unique_id()))
 
-        bowl_id = self.get_unique_id()
+        bowl1_id = self.get_unique_id()
+        bowl1_pos1 = {"x": -0.3, "y": 0.85, "z": -1}
         commands.extend(self.get_add_physics_object(model_name='serving_bowl',
                                             library="models_core.json",
-                                                position={"x": -0.3, "y": 0.85, "z": -1},
+                                                position=bowl1_pos1,
                                                 rotation={"x":0,"y":120,"z":0},
-                                                mass = 3,
-                                                bounciness=1,
+                                                kinematic = True,
+                                                bounciness=0,
                                                 static_friction = 1,
-                                                object_id=bowl_id,
+                                                dynamic_friction = 1,
+                                                object_id=bowl1_id,
                                                 ))
 
         apple_id = self.get_unique_id()
-        # self.info["cmds1"].append(apple_id)  # TO BE DELETED
         commands.extend(self.get_add_physics_object(model_name='apple',
                                             library="models_core.json",
                                                 position={"x": 0.2, "y": 0.8682562, "z": -1.1},
                                                 mass = 3,
-                                                bounciness=1,
+                                                bounciness=0,
+                                                dynamic_friction = 1,
                                                 object_id=apple_id))
 
+        # TO BE FIXED
+        bowl1_pos2 = {"x": -1, "y": -1, "z": -1}
+        share_pos = {"x": -1, "y": -1, "z": -1}
+        self.info["placePos1"].append({"name":"bowl1_1","pos":bowl1_pos1})
+        self.info["placePos1"].append({"name":"bowl1_2","pos":bowl1_pos2})
+        self.info["placePos1"].append({"name":"sharePlace","pos":share_pos})
+
+        bowl2_pos1 = {"x": -1, "y": -1, "z": -1}
+        bowl2_pos2 = {"x": -1, "y": -1, "z": -1}
+        self.info["placePos2"].append({"name":"bowl2_1","pos":bowl2_pos1})
+        self.info["placePos2"].append({"name":"bowl2_2","pos":bowl2_pos2})
+        self.info["placePos2"].append({"name":"sharePlace","pos":share_pos})
 
         # orange_id = self.get_unique_id()
         # commands.extend(self.get_add_physics_object(model_name='b04_orange_00',
@@ -238,6 +256,7 @@ class MultiMagnebot(Controller):
         #                                         mass = 3,
         #                                         bounciness=1,
         #                                         object_id=apple2_id))
+
         return commands
 
 

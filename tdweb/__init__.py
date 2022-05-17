@@ -16,8 +16,9 @@ metadata["camera1"] = []
 metadata["camera2"] = []
 metadata["cmds1"] = []
 metadata["cmds2"] = []
-metadata["objNeedUpdate"] = None
 metadata["objList"] = {}
+metadata["placePos1"] = []
+metadata["placePos2"] = []
 
 
 

@@ -114,8 +114,9 @@ class Post extends React.Component {
                             obj.map((object) => (
                                 <div class="buttons" key={object.objectId}>
                                     <form action="/api/v1/sendcmd/" method="post" enctype="multipart/form-data">
-                                        <input type="hidden" name="objectid" value={object.objectId}/>
                                         <input type="hidden" name="player" value={document.body.id}/>
+                                        <input type="hidden" name="cmd" value="pick"/>
+                                        <input type="hidden" name="args" value={object.objectId}/>
                                         <button class="button is-link is-outlined">
                                             {object.objectName} {object.objectId} {object.x}
                                         </button>
