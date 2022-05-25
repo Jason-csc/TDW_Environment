@@ -26,8 +26,8 @@ import time
 
 def startTDW():
     c = Controller(launch_build=False)
-    camera1 = ThirdPersonCamera(position={"x": 0, "y": 1, "z": 0},
-                            rotation={"x": 70, "y": 0, "z": 0},
+    camera1 = ThirdPersonCamera(position={"x": 0, "y": 3, "z": 0},
+                            rotation={"x": 90, "y": 0, "z": 0},
                             field_of_view = 130,
                             avatar_id="a")
     c.add_ons.extend([camera1])
@@ -42,10 +42,11 @@ def startTDW():
     
     # "dining_room_table","quatre_dining_table","b05_table_new"
     # "table_square","willisau_varion_w3_table","chista_slice_of_teak_table"
-    for i, n in enumerate(["plate05","plate06","plate07","b04_bowl_smooth","serving_bowl"]):
+    # ["plate05","plate06","plate07","b04_bowl_smooth","serving_bowl"]
+    for i, n in enumerate(["dining_room_table","quatre_dining_table","b05_table_new"]):
         commands.extend(c.get_add_physics_object(model_name=n,
                                             library="models_core.json",
-                                                position={"x": i*0.3-1, "y":0, "z": i*0.3-1},
+                                                position={"x": i*1.5, "y":0, "z": i*1.5},
                                                 object_id=c.get_unique_id(),
                                                 ))
 

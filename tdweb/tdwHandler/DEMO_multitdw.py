@@ -25,11 +25,11 @@ import time
 
 def startTDW():
     c = Controller(launch_build=False)
-    magnebot1 = Magnebot(position={"x": 0, "y": 0.5, "z": -1.13}, rotation={"x": 0, "y": 0, "z": 0},robot_id=c.get_unique_id())
-    magnebot2 = Magnebot(position={"x": 0, "y": 0.5, "z": 1.13}, rotation={"x": 0, "y": 180, "z": 0},robot_id=c.get_unique_id())
+    magnebot1 = Magnebot(position={"x": 0, "y": 0.37, "z": -0.83}, rotation={"x": 0, "y": 0, "z": 0},robot_id=c.get_unique_id())
+    magnebot2 = Magnebot(position={"x": 0, "y": 0.37, "z": 0.83}, rotation={"x": 0, "y": 180, "z": 0},robot_id=c.get_unique_id())
     # Create a camera and enable image capture.
-    camera1 = ThirdPersonCamera(position={"x": 0, "y": 1.3, "z": -1},
-                            rotation={"x": 20, "y": 0, "z": 0},
+    camera1 = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": -0.6},
+                            rotation={"x": 30, "y": 0, "z": 0},
                             field_of_view = 100,
                             avatar_id="a")
     
@@ -55,7 +55,7 @@ def startTDW():
     table_id =c.get_unique_id()
     commands.extend(c.get_add_physics_object(model_name='b05_table_new',
                                                 position={"x": 0, "y": 0, "z": 0},
-                                                rotation = {"x":0,"y":90,"z":0},
+                                                rotation = {"x":0,"y":0,"z":0},
                                                 object_id=table_id))
 
     c.communicate(commands)
@@ -69,7 +69,7 @@ def startTDW():
     bowl_id = c.get_unique_id()
     commands.extend(c.get_add_physics_object(model_name='b04_bowl_smooth',
                                         library="models_core.json",
-                                            position={"x": top[0]-0.3, "y": top[1], "z":top[2]-0.6},
+                                            position={"x": top[0]-0.4, "y": top[1], "z":top[2]-0.25},
                                             rotation={"x":0,"y":120,"z":0},
                                             bounciness=0,
                                             kinematic = True,
@@ -81,28 +81,28 @@ def startTDW():
     apple_id = c.get_unique_id()
     commands.extend(c.get_add_physics_object(model_name='apple',
                                         library="models_core.json",
-                                            position={"x": top[0], "y": top[1], "z": top[2]-0.63},
+                                            position={"x": top[0], "y": top[1], "z": top[2]},
                                             bounciness=0,
-                                            # mass=0.001,
+                                            # mass=9999,
                                             kinematic = True,
                                             static_friction = 1,
                                             dynamic_friction = 1,
                                             object_id=apple_id))
 
 
-    orange_id = c.get_unique_id()
-    commands.extend(c.get_add_physics_object(model_name='b04_orange_00',
-                                        library="models_core.json",
-                                           position={"x": top[0], "y": top[1], "z": top[2]+0.1},
-                                            mass = 3,
-                                            bounciness=0,
-                                            object_id=orange_id))
+    # orange_id = c.get_unique_id()
+    # commands.extend(c.get_add_physics_object(model_name='b04_orange_00',
+    #                                     library="models_core.json",
+    #                                        position={"x": top[0], "y": top[1], "z": top[2]+0.1},
+    #                                         mass = 3,
+    #                                         bounciness=0,
+    #                                         object_id=orange_id))
 
 
     banana_id = c.get_unique_id()
     commands.extend(c.get_add_physics_object(model_name='chocolate_bar001',
                                         library="models_core.json",
-                                            position={"x": top[0]+0.3, "y": top[1], "z": top[2]-0.6},
+                                            position={"x": top[0]+0.3, "y": top[1], "z": top[2]-0.1},
                                             bounciness=0,
                                             # mass=9999,
                                             static_friction = 1,
@@ -140,53 +140,54 @@ def startTDW():
     while magnebot1.action.status == ActionStatus.ongoing:
         c.communicate([])
     c.communicate([])
-    magnebot1.reach_for(target={"x": top[0]-0.3, "y": top[1]+0.5, "z": top[2]-0.6}, arm=Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
-    magnebot1.reach_for(target={"x": top[0]-0.3, "y": top[1], "z":top[2]-0.6}, arm=Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
-    magnebot1.drop(apple_id,Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
+    print("GET OBJECT ")
+    # magnebot1.reach_for(target={"x": top[0]-0.4, "y": top[1]+0.6, "z": top[2]-0.25}, arm=Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
+    # magnebot1.reach_for(target={"x": top[0]-0.4, "y": top[1], "z":top[2]-0.25}, arm=Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
+    # magnebot1.drop(apple_id,Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
     # magnebot1.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
     # while magnebot1.action.status == ActionStatus.ongoing:
     #     c.communicate([])
     # c.communicate([])
-    magnebot1.reset_arm(arm=Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
+    # magnebot1.reset_arm(arm=Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
 
     print("grasp completed")
 
-    magnebot1.grasp(banana_id,Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
-    magnebot1.reach_for(target={"x": top[0]-0.3, "y": top[1]+0.33, "z":top[2]-0.6}, arm=Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
-    magnebot1.reach_for(target={"x": top[0]-0.3, "y": top[1]+0.15, "z":top[2]-0.6}, arm=Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
-    magnebot1.drop(banana_id,Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
-    # magnebot1.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
+    # magnebot1.grasp(banana_id,Arm.right)
     # while magnebot1.action.status == ActionStatus.ongoing:
     #     c.communicate([])
     # c.communicate([])
-    magnebot1.reset_arm(arm=Arm.right)
-    while magnebot1.action.status == ActionStatus.ongoing:
-        c.communicate([])
-    c.communicate([])
+    # magnebot1.reach_for(target={"x": top[0]-0.3, "y": top[1]+0.33, "z":top[2]-0.6}, arm=Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
+    # magnebot1.reach_for(target={"x": top[0]-0.3, "y": top[1]+0.15, "z":top[2]-0.6}, arm=Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
+    # magnebot1.drop(banana_id,Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
+    # # magnebot1.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
+    # # while magnebot1.action.status == ActionStatus.ongoing:
+    # #     c.communicate([])
+    # # c.communicate([])
+    # magnebot1.reset_arm(arm=Arm.right)
+    # while magnebot1.action.status == ActionStatus.ongoing:
+    #     c.communicate([])
+    # c.communicate([])
 
 
 

@@ -6,6 +6,7 @@ from tdw.add_ons.add_on import AddOn
 from tdw.tdw_utils import TDWUtils
 from tdw.output_data import OutputData, Images
 import numpy
+from datetime import datetime
 import socket
 import time
 import json
@@ -55,6 +56,7 @@ class ImgCaptureModified(AddOn):
         The current frame count. This is used to generate filenames.
         """
         self.frame: int = 0
+        self.prev_frame: int = 0
         # if isinstance(path, str):
         #     """:field
         #     The path to the output directory.
@@ -79,7 +81,7 @@ class ImgCaptureModified(AddOn):
         self._frequency: str = "always"
         # If True, save images per frame.
         self._save: bool = True
-
+        self.prev_time = datetime.now()
         """:field
         Raw [`Images` output data](../../api/output_data.md#Images) from the build. Key = The ID of the avatar. This is updated per frame. If an avatar didn't capture an image on this frame, it won't be in this dictionary.
         """
@@ -101,7 +103,7 @@ class ImgCaptureModified(AddOn):
         return commands
 
     def on_send(self, resp: List[bytes]) -> None:
-        got_images = False
+        current_time = datetime.now()
         self.images.clear()
         for i in range(len(resp) - 1):
             r_id = OutputData.get_data_type_id(resp[i])
@@ -116,7 +118,9 @@ class ImgCaptureModified(AddOn):
                     #     output_dir.mkdir(parents=True)
                     latest_frame = self.get_pil_images()
                     frame = numpy.array(latest_frame[a]['_img'])
-                    if self.frame%2 == 0:
+                    if (current_time - self.prev_time).microseconds > 100000:
+                        self.prev_time = current_time
+                        self.prev_frame = self.frame
                         if a == 'a':
                             self.image_q1.append(frame)
                         elif a == 'b':
@@ -125,8 +129,7 @@ class ImgCaptureModified(AddOn):
                             raise RuntimeError("Error: avatar_ids should be a or b")
                     # cv2.imshow('Interactive Window',frame)
                     # cv2.waitKey(1)
-        if got_images:
-            self.frame += 1
+        self.frame += 1
         # If we're requesting images per-frame, send the command.
         # We can't use the "always" value because of cases like that Magnebot that will turn off image capture.
         if self._frequency == "always":
