@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd TDW/
-DISPLAY=:1.0 ./TDW.x86_64 -port=1071
+vglrun ./TDW.x86_64 -port=1071
