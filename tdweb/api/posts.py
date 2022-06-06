@@ -74,34 +74,35 @@ def get_obj():
     return flask.jsonify(**context), 200
 
 
-@tdweb.app.route('/api/v1/poslist/', methods=['GET'])
-def get_pos():    
-    context = {"positions":[]}
-    player = flask.request.args.get("player")
-    if player == "player1":
-        for tmp in metadata["placePos1"]:
-            context["pos"].append(tmp)
-    elif player == "player2":
-        for tmp in metadata["placePos2"]:
-            context["pos"].append(tmp)
-    else:
-        raise RuntimeError("Error: wrong playerid")
-    return flask.jsonify(**context), 200
 
 
 @tdweb.app.route('/api/v1/sendcmd/',methods=['POST'])
 def send_control():
-    args = flask.request.form.get('args')
-    player = flask.request.form.get('player')
-    cmd = flask.request.form.get('cmd')
+    print("sending type")
+    print(flask.request.method)
+    args = flask.request.json.get('args')
+    player = flask.request.json.get('player')
+    cmd = flask.request.json.get('cmd')
     if cmd is None or args is None or player is None:
         flask.abort(404)
     command = {"type": cmd, "args": args}
     if player == "player1":
         metadata["cmds1"].append(command)
-        # metadata["cmds1"].append({"type": "drop", "args": {"x": -0.3, "y": 0.85, "z": -1}})
     elif player == "player2":
         metadata["cmds2"].append(command)
     else:
         flask.abort(404)
-    return flask.redirect(flask.url_for(f"show_{player}"))
+    
+    context = {}
+    if cmd == "pick":
+        context["positions"] = []
+        if player == "player1":
+            for tmp in metadata["placePos1"]:
+                context["positions"].append(tmp)
+        elif player == "player2":
+            for tmp in metadata["placePos2"]:
+                context["positions"].append(tmp)
+        else:
+            raise RuntimeError("Error: wrong playerid")
+    return flask.jsonify(**context), 200
+    # return flask.redirect(flask.url_for(f"show_{player}"))

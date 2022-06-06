@@ -6,6 +6,7 @@ from magnebot import Magnebot, ActionStatus, Arm
 from tdw.librarian import ModelLibrarian
 from tdweb.tdwHandler.imagecapture import ImgCaptureModified
 from tdw.add_ons.object_manager import ObjectManager
+from tdw.add_ons.step_physics import StepPhysics
 
 import numpy as np
 import numpy
@@ -53,37 +54,42 @@ class PDRobot(Magnebot):
         """
         super().on_send(resp=resp)
         print(f"====State {self.id} {self.state} ====")
+        print(self.action.status)
         print(self.cmdList)
         if self.cmd is None and len(self.cmdList) > 0:
             self.cmd = self.cmdList.pop(0)
-            if self.cmd["type"] == "pick":
+            if self.cmd["type"][0] == "p":
                 self.objID = int(self.cmd["args"])
                 self.grasp(self.objID, Arm.right)
                 self.state = State.grasp
-            elif self.cmd["type"] == "drop":
+            elif self.cmd["type"][0] == "d":
                 drop_pos = self.cmd["args"]
-                # TO BE FIXED: hard coded
-                # drop_pos = {"x": -0.22, "y": 1.25, "z": -1}
                 self.reach_for(target={
-                                "x": drop_pos["x"], 
-                                "y": drop_pos["y"]+0.4, 
-                                "z": drop_pos["z"]
+                                "x": drop_pos["x"]+0.1, 
+                                "y": drop_pos["y"]+0.3, 
+                                "z": drop_pos["z"]-0.1
                                 }, 
                                 arm=Arm.right)       
                 self.state = State.grasp_back
             self.objupdated_[0] = False
         elif not self.cmd is None:
-            if self.cmd["type"] == "pick":
+            if self.cmd["type"][0] == "p": # 'pick' cmd
                 if self.state == State.grasp and self.action.done:
                     self.state = State.initializing
                     self.cmd = None
-            elif self.cmd["type"] == "drop":
+            elif self.cmd["type"][0] == "d": # 'drop' cmd
                 if self.state == State.grasp_back and self.action.done:
-                    self.drop(self.objID,Arm.right)
+                    drop_pos = self.cmd["args"]
+                    self.reach_for(target={
+                                "x": drop_pos["x"]+0.1, 
+                                "y": drop_pos["y"]+0.05, 
+                                "z": drop_pos["z"]-0.1
+                                }, 
+                                arm=Arm.right)
                     self.state = State.drop
                 elif self.state == State.drop and self.action.done:
-                    #TO BE FIXED: hard coded 
-                    self.reach_for(target={"x": 0, "y": 1.2, "z": -1}, arm=Arm.right)
+                    #TO BE FIXED: hard coded
+                    self.drop(self.objID,Arm.right)
                     self.state = State.drop_back
                     self.objupdated_[0] = False
                 elif self.state == State.drop_back and self.action.done:
@@ -105,22 +111,22 @@ class MultiMagnebot(Controller):
         self.DONE = False
         self.objupdated = [True]
         # Create two robots with corresponding commands
-        self.magnebot1 = PDRobot(position={"x": 0, "y": 0, "z": -1.67}, 
+        self.magnebot1 = PDRobot(position={"x": 0, "y": 0.4, "z": -0.82}, 
                                 rotation={"x": 0, "y": 0, "z": 0},
                                 robot_id=self.get_unique_id(),
                                 cmds=self.info["cmds1"],
                                 objupdated_=self.objupdated)
-        self.magnebot2 = PDRobot(position={"x": 0, "y": 0, "z": 1.67}, 
+        self.magnebot2 = PDRobot(position={"x": 0, "y": 0.4, "z": 0.82}, 
                                 rotation={"x": 0, "y": 180, "z": 0},
                                 robot_id=self.get_unique_id(),
                                 cmds=self.info["cmds2"],
                                 objupdated_=self.objupdated)
         # Create a camera and enable image capture.
-        self.camera1 = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": -1.55},
+        self.camera1 = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": -0.6},
                                 rotation={"x": 30, "y": 0, "z": 0},
                                 field_of_view = 100,
                                 avatar_id="a")
-        self.camera2 = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": 1.55},
+        self.camera2 = ThirdPersonCamera(position={"x": 0, "y": 1.5, "z": 0.6},
                                 rotation={"x": 30, "y": 180, "z": 0},
                                 field_of_view = 100,
                                 avatar_id="b")
@@ -129,7 +135,8 @@ class MultiMagnebot(Controller):
         #Create capture to send images into camera1 and camera2
         self.capture = ImgCaptureModified(avatar_ids=["a","b"],png=False,image_q1=self.info["camera1"],image_q2=self.info["camera2"])
         # Note the order of add-ons. The Magnebot must be added first so that the camera can look at it.
-        self.add_ons.extend([self.magnebot1, self.magnebot2, self.objManager, self.camera1,self.camera2, self.capture])
+        self.add_ons.extend([self.magnebot1, self.magnebot2, self.objManager, self.camera1,self.camera2, self.capture, StepPhysics(num_frames=10)])
+        # self.add_ons.extend([self.magnebot1, self.magnebot2, self.objManager,self.camera1,self.camera2])
         
         commands = self.setUp()
         self.communicate(commands)
@@ -147,7 +154,6 @@ class MultiMagnebot(Controller):
         print("Starting TDW...")
         while not self.DONE:
             self.communicate([])
-            time.sleep(0.1)
         self.communicate({"$type": "terminate"})
     
 
@@ -178,41 +184,52 @@ class MultiMagnebot(Controller):
         print("Setting Up Scene...")
         '''Set up scene'''
         commands = [{"$type": "set_screen_size",
-                        "width": 350,
-                        "height": 350}]
-        # commands.extend([{"$type": "set_render_quality", "render_quality": 5}])
-        commands.extend([TDWUtils.create_empty_room(12, 12)])
-        commands.extend(self.get_add_physics_object(model_name='quatre_dining_table',
-                                            #  library="models_core.json",
+                        "width": 512,
+                        "height": 512},
+                    {"$type": "set_render_quality", "render_quality": 5}
+                    ]
+
+        # set physical motion to False 
+        # https://github.com/threedworld-mit/tdw/blob/master/Documentation/lessons/physx/step_physics.md
+
+        
+
+        commands.extend([TDWUtils.create_empty_room(9, 9)])
+        commands.extend(self.get_add_physics_object(model_name='b05_table_new',
                                                 position={"x": 0, "y": 0, "z": 0},
-                                                kinematic = True,
+                                                rotation = {"x":0,"y":0,"z":0},
                                                 object_id=self.get_unique_id()))
 
+        table_top = {"x":-1.49850675e-05,  "y":6.51243031e-01, "z":-1.47134961e-06}                                       
+
         bowl1_id = self.get_unique_id()
-        bowl1_pos1 = {"x": -0.3, "y": 0.85, "z": -1}
-        commands.extend(self.get_add_physics_object(model_name='serving_bowl',
-                                            library="models_core.json",
-                                                position=bowl1_pos1,
-                                                rotation={"x":0,"y":120,"z":0},
-                                                kinematic = True,
-                                                bounciness=0,
-                                                static_friction = 1,
-                                                dynamic_friction = 1,
-                                                object_id=bowl1_id,
-                                                ))
+        bowl1_pos1 = {"x": table_top['x']+0.4, "y": table_top['y'], "z":table_top['z']-0.22}
+        commands.extend(self.get_add_physics_object(model_name='b04_bowl_smooth',
+                                        library="models_core.json",
+                                            position=bowl1_pos1,
+                                            rotation={"x":0,"y":120,"z":0},
+                                            bounciness=0,
+                                            kinematic = True,
+                                            static_friction = 1,
+                                            dynamic_friction = 1,
+                                            object_id=bowl1_id,
+                                            ))
 
         apple_id = self.get_unique_id()
+        apple_pos = table_top
         commands.extend(self.get_add_physics_object(model_name='apple',
-                                            library="models_core.json",
-                                                position={"x": 0.2, "y": 0.8682562, "z": -1.1},
-                                                mass = 3,
-                                                bounciness=0,
-                                                dynamic_friction = 1,
-                                                object_id=apple_id))
+                                        library="models_core.json",
+                                            position=apple_pos,
+                                            bounciness=0,
+                                            # mass=9999,
+                                            kinematic = True,
+                                            static_friction = 1,
+                                            dynamic_friction = 1,
+                                            object_id=apple_id))
 
         # TO BE FIXED
         bowl1_pos2 = {"x": -1, "y": -1, "z": -1}
-        share_pos = {"x": -1, "y": -1, "z": -1}
+        share_pos = table_top
         self.info["placePos1"].append({"name":"bowl1_1","pos":bowl1_pos1})
         self.info["placePos1"].append({"name":"bowl1_2","pos":bowl1_pos2})
         self.info["placePos1"].append({"name":"sharePlace","pos":share_pos})
@@ -223,39 +240,7 @@ class MultiMagnebot(Controller):
         self.info["placePos2"].append({"name":"bowl2_2","pos":bowl2_pos2})
         self.info["placePos2"].append({"name":"sharePlace","pos":share_pos})
 
-        # orange_id = self.get_unique_id()
-        # commands.extend(self.get_add_physics_object(model_name='b04_orange_00',
-        #                                     library="models_core.json",
-        #                                         position={"x": 0.10, "y": 0.8682562, "z": -0.9},
-        #                                         mass = 3,
-        #                                         bounciness=1,
-        #                                         object_id=orange_id))
 
-
-        # banana_id = self.get_unique_id()
-        # commands.extend(self.get_add_physics_object(model_name='b04_banana',
-        #                                     library="models_core.json",
-        #                                         position={"x": 0, "y": 0.8682562, "z": -0.4},
-        #                                         mass = 3,
-        #                                         bounciness=1,
-        #                                         object_id=banana_id))
-
-        # banana2_id = self.get_unique_id()
-        # commands.extend(self.get_add_physics_object(model_name='b04_banana',
-        #                                     library="models_core.json",
-        #                                         position={"x": 0.24, "y": 0.8682562, "z": 0.4},
-        #                                         mass = 3,
-        #                                         bounciness=1,
-        #                                         object_id=banana2_id))
-
-
-        # apple2_id = self.get_unique_id()
-        # commands.extend(self.get_add_physics_object(model_name='apple',
-        #                                     library="models_core.json",
-        #                                         position={"x": -0.17, "y": 0.8682562, "z": 0.25},
-        #                                         mass = 3,
-        #                                         bounciness=1,
-        #                                         object_id=apple2_id))
 
         return commands
 

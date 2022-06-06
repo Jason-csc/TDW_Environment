@@ -2,3 +2,4 @@
 
 cd TDW/
 vglrun ./TDW.x86_64 -port=1071
+# sudo service gdm3 restart

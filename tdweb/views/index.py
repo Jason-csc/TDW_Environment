@@ -3,14 +3,13 @@ tdwebindex (main) view.
 URLs include:
 /
 """
-from crypt import methods
-from queue import Queue
 import flask
 from flask import Flask,render_template,Response
 import tdweb
 import threading
 import numpy as np
 import time
+import numpy 
 
 from tdweb.tdwHandler.MultiTDW import startMultiTDW
 from tdweb import metadata as metadata
@@ -74,11 +73,11 @@ def generate_frames1():
         ## read the camera frame1
         if len(metadata["camera1"]) == 0:
             frame = prev1
+            if prev1 is None:
+                continue
         else:
             frame=metadata["camera1"].pop(0)
-            tmp = frame[:,:,0].copy()
-            frame[:,:,0] = frame[:,:,2]
-            frame[:,:,2] = tmp
+            frame = numpy.array(frame)[:,:,::-1]
             prev1 = frame
         
         ret,buffer=cv2.imencode('.jpg',frame)
@@ -93,12 +92,12 @@ def generate_frames2():
     while True:
         ## read the camera frame2
         if len(metadata["camera2"]) == 0:
+            if prev2 is None:
+                continue
             frame = prev2
         else:
             frame=metadata["camera2"].pop(0)
-            tmp = frame[:,:,0].copy()
-            frame[:,:,0] = frame[:,:,2]
-            frame[:,:,2] = tmp
+            frame = numpy.array(frame)[:,:,::-1]
             prev2 = frame
         
         ret,buffer=cv2.imencode('.jpg',frame)
@@ -118,21 +117,3 @@ def video1():
 def video2():
     return Response(generate_frames2(),mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
-
-# @tdweb.app.route('/control/<player>/',methods=['POST'])
-# def send_control(player):
-#     objectid = flask.request.form.get('objectid')
-#     if objectid is None:
-#         flask.abort(404)
-#     objectid = int(objectid)
-#     if player == "player1":
-#         print("="*10)
-#         print("SENDDING ",objectid)
-#         print("="*10)
-#         metadata["cmds1"].append(objectid)
-#     elif player == "player2":
-#         metadata["cmds2"].append(objectid)
-#     else:
-#         flask.abort(404)
-#     return flask.redirect(flask.url_for(f"show_{player}"))
