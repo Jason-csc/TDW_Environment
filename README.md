@@ -4,6 +4,8 @@ Simulated Environment for human-robot interaction using ThreeDWorld ([TDW](https
 - Click objects listed to pick the item and place in the bowl
 - Chat with partner for collaborative tasks
 
+<img src="https://github.com/Jason-csc/TDW_Environment/blob/addJS/tdweb/static/demo.png" width=80%>
+
 ## Set up
 Python tools and third party packages Installation: 
 ```bash
