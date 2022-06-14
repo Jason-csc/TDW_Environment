@@ -14,6 +14,7 @@ class Post extends React.Component {
             obj: [],
             positions: [],
             status: '', //PICK or DROP
+            task: '',
         };
         this.handleNewComment = this.handleNewComment.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -39,6 +40,7 @@ class Post extends React.Component {
                     obj: [],
                     positions: data.positions,
                     status: data.status,
+                    task: data.task
                 });
             })
             .catch((error) => console.log(error));
@@ -205,6 +207,11 @@ class Post extends React.Component {
                         </div>
                     </div>
                 </div>
+
+
+
+                {/* Add Text Box Here */}
+
             </div>
 
         );

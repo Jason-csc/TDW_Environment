@@ -33,6 +33,13 @@ def db_get_chats():
     return {"chats":chats, "num":len(chats)}
 
 
+
+def get_task(player):
+    # TODO: Generate Task for each player
+    return ''
+
+
+
 @tdweb.app.route('/api/v1/chats/', methods=['GET'])
 def get_chats_pos():
     # get chats from database
@@ -53,6 +60,8 @@ def get_chats_pos():
         else:
             raise RuntimeError("Error: wrong playerid")
     
+        context["task"] = get_task(player)
+
     return flask.jsonify(**context), 200
 
 
