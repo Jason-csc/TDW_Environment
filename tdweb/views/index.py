@@ -3,29 +3,19 @@ tdwebindex (main) view.
 URLs include:
 /
 """
-from crypt import methods
-from queue import Queue
 import flask
 from flask import Flask,render_template,Response
 import tdweb
 import threading
 import numpy as np
 import time
+import numpy 
 
-# from tdweb.views.TDW import startTDW
-from tdweb.views.MultiTDW import startMultiTDW
+from tdweb.tdwHandler.MultiTDW import startMultiTDW
+from tdweb import metadata as metadata
 
 import cv2
 
-info = {}
-info["start"] = False
-info["prepared"] = False
-info["camera1"] = []
-info["camera2"] = []
-info["cmds1"] = []
-info["cmds2"] = []
-info["objNeedUpdate"] = None
-info["objList"] = {}
 
 prev1 = None
 prev2 = None
@@ -33,36 +23,19 @@ prev2 = None
 
 
 # import random
-# def dummy_addcmds1(info):
+# def dummy_addcmds1(metadata):
 #     #TO BE FIXED: call by buttom to add cmds
 #     print("INPUTTING PICK APPLE ")
 #     time.sleep(10)
-#     info["cmds1"].append(999)
+#     metadata["cmds1"].append(999)
         
     
-# def dummy_addcmds2(info):
+# def dummy_addcmds2(metadata):
 #     return 0
 #     # while True:
-#     #     # if len(info["cmds2"]) == 0:
-#     #     #     info["cmds2"].append(random.choice((1,2,1.5)))
+#     #     # if len(metadata["cmds2"]) == 0:
+#     #     #     metadata["cmds2"].append(random.choice((1,2,1.5)))
 #     #     # time.sleep(10)
-
-
-def updateDB(info):
-    while True:
-        if info["objNeedUpdate"]:
-            with tdweb.app.app_context():
-                connection = tdweb.model.get_db()
-                connection.execute("DELETE FROM objList; ")
-                for object_id,objt in info["objList"].items():
-                    connection.execute(
-                        "INSERT INTO objList(objectname,objectid,x,y,z,reachable1,reachable2) VALUES "+
-                        "(?,?,?,?,?,?,?)",
-                        (objt["name"],object_id,objt["position"][0],objt["position"][1],objt["position"][2],objt["reachable1"],objt["reachable2"])
-                    )
-                info["objNeedUpdate"] = False
-        time.sleep(1)
-
 
 
 
@@ -70,16 +43,13 @@ def updateDB(info):
 @tdweb.app.route('/player1/',methods=['GET'])
 def show_player1():
     """Display / route."""
-    if not info["start"]:
-        thread = threading.Thread(target=startMultiTDW,args=(info,))
+    if not metadata["start"]:
+        thread = threading.Thread(target=startMultiTDW,args=(metadata,))
         thread.start()
         # TO be fixed: DUMMY ADD CMD
     while True:
-        if info["prepared"]:
+        if metadata["prepared"]:
             break
-        time.sleep(0.1)
-    thread = threading.Thread(target=updateDB,args=(info,))
-    thread.start()
     context = {}
     return flask.render_template("index1.html", **context)
 
@@ -88,9 +58,8 @@ def show_player1():
 def show_player2():
     """Display / route."""
     while True:
-        if info["prepared"]:
+        if metadata["prepared"]:
             break
-        time.sleep(0.1)
     context = {}
     return flask.render_template("index2.html", **context)
 
@@ -100,13 +69,13 @@ def generate_frames1():
     global prev1
     while True:
         ## read the camera frame1
-        if len(info["camera1"]) == 0:
+        if len(metadata["camera1"]) == 0:
             frame = prev1
+            if prev1 is None:
+                continue
         else:
-            frame=info["camera1"].pop(0)
-            tmp = frame[:,:,0].copy()
-            frame[:,:,0] = frame[:,:,2]
-            frame[:,:,2] = tmp
+            frame=metadata["camera1"].pop(0)
+            frame = numpy.array(frame)[:,:,::-1]
             prev1 = frame
         
         ret,buffer=cv2.imencode('.jpg',frame)
@@ -120,13 +89,13 @@ def generate_frames2():
     global prev2
     while True:
         ## read the camera frame2
-        if len(info["camera2"]) == 0:
+        if len(metadata["camera2"]) == 0:
+            if prev2 is None:
+                continue
             frame = prev2
         else:
-            frame=info["camera2"].pop(0)
-            tmp = frame[:,:,0].copy()
-            frame[:,:,0] = frame[:,:,2]
-            frame[:,:,2] = tmp
+            frame=metadata["camera2"].pop(0)
+            frame = numpy.array(frame)[:,:,::-1]
             prev2 = frame
         
         ret,buffer=cv2.imencode('.jpg',frame)
@@ -146,21 +115,3 @@ def video1():
 def video2():
     return Response(generate_frames2(),mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
-
-@tdweb.app.route('/control/<player>/',methods=['POST'])
-def send_control(player):
-    objectid = flask.request.form.get('objectid')
-    if objectid is None:
-        flask.abort(404)
-    objectid = int(objectid)
-    if player == "player1":
-        print("="*10)
-        print("SENDDING ",objectid)
-        print("="*10)
-        info["cmds1"].append(objectid)
-    elif player == "player2":
-        info["cmds2"].append(objectid)
-    else:
-        flask.abort(404)
-    return flask.redirect(flask.url_for(f"show_{player}"))

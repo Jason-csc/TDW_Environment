@@ -6,6 +6,7 @@ from tdw.add_ons.add_on import AddOn
 from tdw.tdw_utils import TDWUtils
 from tdw.output_data import OutputData, Images
 import numpy
+from datetime import datetime
 import socket
 import time
 import json
@@ -55,15 +56,6 @@ class ImgCaptureModified(AddOn):
         The current frame count. This is used to generate filenames.
         """
         self.frame: int = 0
-        # if isinstance(path, str):
-        #     """:field
-        #     The path to the output directory.
-        #     """
-        #     self.path: Path = Path(path)
-        # else:
-        #     self.path: Path = path
-        # if not self.path.exists():
-        #     self.path.mkdir(parents=True)
         if avatar_ids is None:
             """:field
             The IDs of the avatars that will capture and save images. If empty, all avatars will capture and save images.
@@ -79,7 +71,7 @@ class ImgCaptureModified(AddOn):
         self._frequency: str = "always"
         # If True, save images per frame.
         self._save: bool = True
-
+        # self.prev_time = datetime.now()
         """:field
         Raw [`Images` output data](../../api/output_data.md#Images) from the build. Key = The ID of the avatar. This is updated per frame. If an avatar didn't capture an image on this frame, it won't be in this dictionary.
         """
@@ -101,37 +93,41 @@ class ImgCaptureModified(AddOn):
         return commands
 
     def on_send(self, resp: List[bytes]) -> None:
-        got_images = False
+        # current_time = datetime.now()
         self.images.clear()
         for i in range(len(resp) - 1):
-            r_id = OutputData.get_data_type_id(resp[i])
-            if r_id == "imag":
+            r_id = OutputData.get_data_type_id(resp[i])            
+            if r_id[0] == "i": # if r_id[0] == "imag":
                 images = Images(resp[i])
                 a = images.get_avatar_id()
                 # Store the image data.
-                self.images[a] = images
+                self.images[a] = Images(resp[i])
                 if self._save and (len(self.avatar_ids) == 0 or a in self.avatar_ids):
-                    # output_dir = self.path.joinpath(a)
-                    # if not output_dir.exists():
-                    #     output_dir.mkdir(parents=True)
                     latest_frame = self.get_pil_images()
-                    frame = numpy.array(latest_frame[a]['_img'])
+                    frame = latest_frame[a]['_img']
+                    # if (current_time - self.prev_time).microseconds > 100000:
+                    #     self.prev_time = current_time
+                    # print("="*10)
+                    # print("Shape:")
+                    # print(frame)
+                    # print(numpy.array(frame).shape)
                     if a == 'a':
                         self.image_q1.append(frame)
                     elif a == 'b':
                         self.image_q2.append(frame)
                     else:
                         raise RuntimeError("Error: avatar_ids should be a or b")
-                    # cv2.imshow('Interactive Window',frame)
-                    # cv2.waitKey(1)
-        if got_images:
-            self.frame += 1
+                 
+        self.frame += 1
         # If we're requesting images per-frame, send the command.
         # We can't use the "always" value because of cases like that Magnebot that will turn off image capture.
+        # if self._frequency == "always":
+        # if self.frame%2 == 0:
         if self._frequency == "always":
             self.commands.append({"$type": "send_images",
                                   "frequency": "once",
                                   "ids": self.avatar_ids})
+
 
     def set(self, frequency: str = "always", avatar_ids: List[str] = None, pass_masks: List[str] = None, save: bool = True) -> None:
         """
