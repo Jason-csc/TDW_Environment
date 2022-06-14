@@ -8,7 +8,6 @@ app.config.from_object('tdweb.config')
 app.config.from_envvar('tdweb_SETTINGS', silent=True)
 
 
-
 metadata = dict()
 metadata["start"] = False
 metadata["prepared"] = False
@@ -19,6 +18,8 @@ metadata["cmds2"] = []
 metadata["objList"] = {}
 metadata["placePos1"] = []
 metadata["placePos2"] = []
+metadata["status1"] = ["PICK"]
+metadata["status2"] = ["PICK"]
 
 
 

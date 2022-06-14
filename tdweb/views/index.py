@@ -50,7 +50,6 @@ def show_player1():
     while True:
         if metadata["prepared"]:
             break
-        time.sleep(0.1)
     context = {}
     return flask.render_template("index1.html", **context)
 
@@ -61,7 +60,6 @@ def show_player2():
     while True:
         if metadata["prepared"]:
             break
-        time.sleep(0.1)
     context = {}
     return flask.render_template("index2.html", **context)
 

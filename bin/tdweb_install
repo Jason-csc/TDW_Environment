@@ -12,8 +12,7 @@ npm ci .
 npm install chromedriver --detect_chromedriver_version --no-save
 
 
-
-wget https://github.com/threedworld-mit/tdw/releases/download/v1.9.17/TDW_Linux.tar.gz
+wget https://github.com/threedworld-mit/tdw/releases/download/v1.10.0/TDW_Linux.tar.gz
 tar -xvzf TDW_Linux.tar.gz
 rm -rf TDW_Linux.tar.gz
 

@@ -20,24 +20,7 @@ class InvalidUsage(Exception):
         return msg
 
 
-@tdweb.app.route('/api/v1/chats/', methods=['GET','POST'])
-def get_chats():
-    if flask.request.method == 'POST':
-        owner = flask.request.json.get("owner")
-        if owner is None or len(owner) == 0:
-            raise InvalidUsage('Bad Request', status_code=400)
-
-        text = flask.request.json.get("text")
-        if text is None or len(owner) == 0:
-            raise InvalidUsage('Bad Request', status_code=400)
-
-        connection = tdweb.model.get_db()
-        connection.execute(
-            'INSERT INTO chats(owner, text) VALUES (?,?);',
-            (owner,text)
-        )
-        # print(f"insert {owner} {text}")
-    
+def db_get_chats():
     connection = tdweb.model.get_db()
     cur1 = connection.execute(
         "SELECT *" +
@@ -47,10 +30,51 @@ def get_chats():
     chats = []
     for res in cur1:
         chats.append({"chatid":res["chatid"],"owner":res["owner"],"text":res["text"],"created":res["created"]})
-    context = {"chats":chats, "num":len(chats)}
-    # print(context)
+    return {"chats":chats, "num":len(chats)}
+
+
+@tdweb.app.route('/api/v1/chats/', methods=['GET'])
+def get_chats_pos():
+    # get chats from database
+    context = db_get_chats()
+    
+    player = flask.request.args.get("player")
+    # get positions & status
+    if player is not None:
+        context["positions"] = []
+        if player == "player1":
+            context["status"] = metadata["status1"]
+            for tmp in metadata["placePos1"]:
+                context["positions"].append(tmp)
+        elif player == "player2":
+            context["status"] = metadata["status2"]
+            for tmp in metadata["placePos2"]:
+                context["positions"].append(tmp)
+        else:
+            raise RuntimeError("Error: wrong playerid")
+    
     return flask.jsonify(**context), 200
 
+
+
+@tdweb.app.route('/api/v1/addchats/', methods=['POST'])
+def add_chats():
+    owner = flask.request.json.get("owner")
+    if owner is None or len(owner) == 0:
+        raise InvalidUsage('Bad Request', status_code=400)
+    text = flask.request.json.get("text")
+    if text is None or len(owner) == 0:
+        raise InvalidUsage('Bad Request', status_code=400)
+    connection = tdweb.model.get_db()
+    connection.execute(
+        'INSERT INTO chats(owner, text) VALUES (?,?);',
+        (owner,text)
+    )
+    # print(f"insert {owner} {text}")
+    
+    context = db_get_chats()
+    # print(context)
+    return flask.jsonify(**context), 200
 
 @tdweb.app.route('/api/v1/objlist/', methods=['GET'])
 def get_obj():    
@@ -58,11 +82,12 @@ def get_obj():
     player = flask.request.args.get("player")
     for objectid,res in metadata["objList"].items():
         tmp = {}
-        tmp["objectId"] = objectid
+        tmp["objectId"] = int(objectid)
         tmp["objectName"] = res["name"]
-        tmp["x"] = res["position"][0]
-        tmp["y"] = res["position"][1]
-        tmp["z"] = res["position"][2]
+        # numpy float32 object cannot be converted to JSON
+        tmp["x"] = float(res["position"][0])
+        tmp["y"] = float(res["position"][1])
+        tmp["z"] = float(res["position"][2])
         if player == "player1":
             tmp["reachable"] = res["reachable1"]
             context["obj"].append(tmp)
@@ -94,15 +119,14 @@ def send_control():
         flask.abort(404)
     
     context = {}
-    if cmd == "pick":
-        context["positions"] = []
-        if player == "player1":
-            for tmp in metadata["placePos1"]:
-                context["positions"].append(tmp)
-        elif player == "player2":
-            for tmp in metadata["placePos2"]:
-                context["positions"].append(tmp)
-        else:
-            raise RuntimeError("Error: wrong playerid")
+    # if cmd == "pick":
+    #     context["positions"] = []
+    #     if player == "player1":
+    #         for tmp in metadata["placePos1"]:
+    #             context["positions"].append(tmp)
+    #     elif player == "player2":
+    #         for tmp in metadata["placePos2"]:
+    #             context["positions"].append(tmp)
+    #     else:
+    #         raise RuntimeError("Error: wrong playerid")
     return flask.jsonify(**context), 200
-    # return flask.redirect(flask.url_for(f"show_{player}"))

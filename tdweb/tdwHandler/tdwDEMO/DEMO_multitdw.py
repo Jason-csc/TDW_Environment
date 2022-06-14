@@ -33,7 +33,6 @@ def generate_frames1():
     global prev1
     while True:
         ## read the camera frame1
-        print(len(metadata["camera1"]))
         if len(metadata["camera1"]) == 0:
             frame = prev1
             if prev1 is None:
@@ -51,7 +50,6 @@ def generate_frames2():
     global prev2
     while True:
         ## read the camera frame1
-        print(len(metadata["camera2"]))
         if len(metadata["camera2"]) == 0:
             frame = prev1
             if prev1 is None:

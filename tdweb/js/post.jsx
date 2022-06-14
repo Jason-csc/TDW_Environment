@@ -13,18 +13,20 @@ class Post extends React.Component {
             value: '',
             obj: [],
             positions: [],
-            status: true,
+            status: '', //PICK or DROP
         };
         this.handleNewComment = this.handleNewComment.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleStatus = this.handleStatus.bind(this);
     }
 
+
+
     componentDidMount() {
         this.setChecker = setInterval(this.checkdbchat.bind(this), 300);
         this.setChecker2 = setInterval(this.checkdbobj.bind(this), 400);
         const { url } = this.props;
-        fetch(url, { credentials: 'same-origin' })
+        fetch(`${url}?player=${document.body.id}`, { credentials: 'same-origin' })
             .then((response) => {
                 if (!response.ok) throw Error(response.statusText);
                 return response.json();
@@ -35,14 +37,15 @@ class Post extends React.Component {
                     num: data.num,
                     value: '',
                     obj: [],
+                    positions: data.positions,
+                    status: data.status,
                 });
             })
             .catch((error) => console.log(error));
     }
 
     checkdbobj() {
-        const { url2 } = this.props;
-        fetch(`${url2}?player=${document.body.id}`, { credentials: 'same-origin' })
+        fetch(`/api/v1/objlist/?player=${document.body.id}`, { credentials: 'same-origin' })
             .then((response) => {
                 if (!response.ok) throw Error(response.statusText);
                 return response.json();
@@ -68,7 +71,6 @@ class Post extends React.Component {
                     this.setState({
                         chats: data.chats,
                         num: data.num,
-                        value: ''
                     });
                 }
             })
@@ -77,8 +79,8 @@ class Post extends React.Component {
 
     handleNewComment(event) {
         const { value } = this.state;
-        console.log("enter herere");
-        fetch(`/api/v1/chats/`,
+        // console.log("enter herere");
+        fetch(`/api/v1/addchats/`,
             {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -107,70 +109,46 @@ class Post extends React.Component {
     }
 
     handleStatus(event) {
-        console.log("handle status here");
+        // console.log("handle status here");
         const { status } = this.state;
-        console.log(status);
-        console.log(event.target.value);
-        // console.log(event.target.value.player);
-        // console.log(event.target.value["player"]);
-        // const player = event.target.value["player"];
-        // const cmd = event.target.value["cmd"];
-        // const args = event.target.value["args"];
+        // console.log(status);
         const {player, cmd, args} = JSON.parse(event.target.value);
-        console.log(cmd);
-        if (status) {
+        if (status=="PICK") {
             clearInterval(this.setChecker2);
-            fetch(`/api/v1/sendcmd/`, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ player:player, cmd:cmd, args:args }),
-            })
-                .then((response) => {
-                    if (!response.ok) throw Error(response.statusText);
-                    return response.json();
-                })
-                .then((data) => {
-                    this.setState({
-                        positions: data.positions,
-                        status: false,
-                    });
-                })
-                .catch((error) => console.log(error));
-        } else {
-            this.setChecker2 = setInterval(this.checkdbobj.bind(this), 400);
-            fetch(`/api/v1/sendcmd/`, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ player:player, cmd:cmd, args:args }),
-            })
-                .then((response) => {
-                    if (!response.ok) throw Error(response.statusText);
-                    return response.json();
-                })
-                .then((data) => {
-                    this.setState({
-                        status: true,
-                    });
-                })
-                .catch((error) => console.log(error));
         }
-
+        else {
+            this.setChecker2 = setInterval(this.checkdbobj.bind(this), 400);
+        }
+        fetch(`/api/v1/sendcmd/`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ player:player, cmd:cmd, args:args }),
+        })
+            .then((response) => {
+                if (!response.ok) throw Error(response.statusText);
+                return response.json();
+            })
+            .then((data) => {
+                this.setState({
+                    status: (status=="PICK") ? "DROP" : "PICK",
+                });
+            })
+            .catch((error) => console.log(error));
+        
     }
 
     render() {
-        const { chats, value, obj, status, positions } = this.state;
-        console.log("status");
+        const { chats, value, obj, status, positions } = this.state
+        console.log("status")
         console.log(status)
+        // console.log(positions)
         return (
             <div>
                 <div class="box">
-                    {status
+                    {status=="PICK"
                         ? <div style={{ height: '250px', overflowY: 'auto' }}>
                             <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Objects:</label>
                             {
@@ -179,14 +157,6 @@ class Post extends React.Component {
                                         <button class="button is-link is-outlined" value={JSON.stringify({player:document.body.id, cmd:"pick", args:object.objectId})} onClick={this.handleStatus} >
                                                 {object.objectName} {object.objectId} {object.x}
                                         </button>
-                                        {/* <form action="/api/v1/sendcmd/" method="post" enctype="multipart/form-data">
-                                            <input type="hidden" name="player" value={document.body.id} />
-                                            <input type="hidden" name="cmd" value="pick" />
-                                            <input type="hidden" name="args" value={object.objectId} />
-                                            <button onClick={this.handleStatus}>
-                                                {object.objectName} {object.objectId} {object.x}
-                                            </button>
-                                        </form> */}
                                     </div>
                                 ))
                             }
@@ -199,14 +169,6 @@ class Post extends React.Component {
                                         <button class="button is-link is-outlined" value={JSON.stringify({player:document.body.id, cmd:"drop", args:position.pos})} onClick={this.handleStatus} >
                                         {position.name} {position.pos.x} {position.pos.y} {position.pos.z}
                                         </button>
-                                        {/* <form action="/api/v1/sendcmd/" method="post" enctype="multipart/form-data">
-                                            <input type="hidden" name="player" value={document.body.id} />
-                                            <input type="hidden" name="cmd" value="drop" />
-                                            <input type="hidden" name="args" value={position.pos} />
-                                            <button class="button is-link is-outlined"  onClick={this.handleStatus}>
-                                                {position.name} {position.pos.x} {position.pos.y} {position.pos.z}
-                                            </button>
-                                        </form> */}
                                     </div>
                                 ))
                             }
@@ -216,7 +178,7 @@ class Post extends React.Component {
 
                 <div class="box">
                     <div class="field">
-                        <label class="label" style={{ fontSize: '2vw', width: '500px' }}>Chat box</label>
+                        <label class="label" style={{ fontSize: '1.7vw', width: '500px' }}>Chat box</label>
                         <div className="chat">
                             <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
                                 {
