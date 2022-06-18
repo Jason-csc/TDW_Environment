@@ -36,6 +36,8 @@ def db_get_chats():
 
 def get_task(player):
     # TODO: Generate Task for each player
+    # for objectid,res in metadata["objList"].items():
+    #     objectname = res["name"]
     return ''
 
 
@@ -128,14 +130,4 @@ def send_control():
         flask.abort(404)
     
     context = {}
-    # if cmd == "pick":
-    #     context["positions"] = []
-    #     if player == "player1":
-    #         for tmp in metadata["placePos1"]:
-    #             context["positions"].append(tmp)
-    #     elif player == "player2":
-    #         for tmp in metadata["placePos2"]:
-    #             context["positions"].append(tmp)
-    #     else:
-    #         raise RuntimeError("Error: wrong playerid")
     return flask.jsonify(**context), 200

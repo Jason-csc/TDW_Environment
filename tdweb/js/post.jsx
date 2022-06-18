@@ -47,7 +47,8 @@ class Post extends React.Component {
     }
 
     checkdbobj() {
-        fetch(`/api/v1/objlist/?player=${document.body.id}`, { credentials: 'same-origin' })
+        const { url2 } = this.props;
+        fetch(`${url2}?player=${document.body.id}`, { credentials: 'same-origin' })
             .then((response) => {
                 if (!response.ok) throw Error(response.statusText);
                 return response.json();
@@ -151,14 +152,20 @@ class Post extends React.Component {
             <div>
                 <div class="box">
                     {status=="PICK"
-                        ? <div style={{ height: '250px', overflowY: 'auto' }}>
-                            <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Objects:</label>
+                        ? <div style={{ height: '300px', overflowY: 'auto' }}>
+                            <label class="label" style={{ fontSize: '1.2vw', width: '250px' }}>Select Objects:</label>
                             {
                                 obj.map((object) => (
                                     <div class="buttons" key={object.objectId}>
-                                        <button class="button is-link is-outlined" value={JSON.stringify({player:document.body.id, cmd:"pick", args:object.objectId})} onClick={this.handleStatus} >
-                                                {object.objectName} {object.objectId} {object.x}
+                                        {object.reachable
+                                        ? <button class="button is-link is-outlined" value={JSON.stringify({player:document.body.id, cmd:"pick", args:object.objectId})} onClick={this.handleStatus} >
+                                            {object.objectName} {object.x} {object.z}
                                         </button>
+                                        : <button class="button is-link is-outlined" disabled>
+                                            {object.objectName} {object.x} {object.z}
+                                        </button>
+                                        }
+                                        
                                     </div>
                                 ))
                             }
