@@ -1,7 +1,9 @@
 """REST API for posts."""
+from asyncio import tasks
 import flask
 import tdweb
 from tdweb import metadata as metadata
+import random
 
 
 class InvalidUsage(Exception):
@@ -38,7 +40,17 @@ def get_task(player):
     # TODO: Generate Task for each player
     # for objectid,res in metadata["objList"].items():
     #     objectname = res["name"]
-    return ''
+    return dummy_tasks()
+
+def dummy_tasks():
+    candidates = ['a','b','c','d','e','f','g']
+    tasks = []
+    sz = random.randint(1,len(candidates)-1)
+    for i in range(sz):
+        tasks.append(candidates[random.randint(1,len(candidates)-1)])
+    # print(*memo)
+    return tasks
+
 
 
 

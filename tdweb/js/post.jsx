@@ -76,6 +76,9 @@ class Post extends React.Component {
                         num: data.num,
                     });
                 }
+                this.setState({
+                    task: data.task
+                })
             })
             .catch((error) => console.log(error));
     }
@@ -148,79 +151,96 @@ class Post extends React.Component {
         console.log("status")
         console.log(status)
         // console.log(positions)
+        let vidUrl
+        if(document.body.id == "player1"){
+            vidUrl = "/video1"
+        }
+        else if(document.body.id == "player2"){
+            vidUrl = "/video2"
+        }
+        else{
+            throw Error("wrong body id")
+        }
         return (
-            <div>
-                <div class="box">
-                    {status=="PICK"
-                        ? <div style={{ height: '300px', overflowY: 'auto' }}>
-                            <label class="label" style={{ fontSize: '1.2vw', width: '250px' }}>Select Objects:</label>
-                            {
-                                obj.map((object) => (
-                                    <div class="buttons" key={object.objectId}>
-                                        {object.reachable
-                                        ? <button class="button is-link is-outlined" value={JSON.stringify({player:document.body.id, cmd:"pick", args:object.objectId})} onClick={this.handleStatus} >
-                                            {object.objectName} {object.x} {object.z}
-                                        </button>
-                                        : <button class="button is-link is-outlined" disabled>
-                                            {object.objectName} {object.x} {object.z}
-                                        </button>
-                                        }
-                                        
-                                    </div>
-                                ))
-                            }
+            <div class="container">
+                <div class="columns">
+                    <div class="column is-6" id="vid">
+                        <div>
+                            <img src={vidUrl} />
                         </div>
-                        : <div style={{ height: '250px', overflowY: 'auto' }}>
-                            <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Where to place the object you're holding:</label>
-                            {
-                                positions.map((position) => (
-                                    <div class="buttons" key={position.name}>
-                                        <button class="button is-link is-outlined" value={JSON.stringify({player:document.body.id, cmd:"drop", args:position.pos})} onClick={this.handleStatus} >
-                                        {position.name} {position.pos.x} {position.pos.y} {position.pos.z}
-                                        </button>
-                                    </div>
-                                ))
-                            }
-                        </div>
-                    }
-                </div>
-
-                <div class="box">
-                    <div class="field">
-                        <label class="label" style={{ fontSize: '1.7vw', width: '500px' }}>Chat box</label>
-                        <div className="chat">
+                        <div class="box">
                             <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
                                 {
-                                    chats.map((singleChat) => (
-                                        <div class="box" key={singleChat.chatid}>
-                                            <strong>{singleChat.owner.toUpperCase()}</strong> <small>{singleChat.created}</small>
-                                            <br />
-                                            {singleChat.text}
-                                        </div>
+                                    memo.map((m)=>(
+                                        <div class="box" key={m}>{m}<br></br></div>
                                     ))
                                 }
                             </div>
-                            <form onSubmit={this.handleNewComment}>
-                                <div class="field">
-                                    <strong>You ({document.body.id}) </strong>
-                                    <div class="control">
-                                        <textarea class="textarea" placeholder="Leave your message " value={value} onChange={this.handleChange}></textarea>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="box">
+                            {status == "PICK"
+                                ? <div style={{ height: '250px', overflowY: 'auto' }}>
+                                    <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Objects:</label>
+                                    {
+                                        obj.map((object) => (
+                                            <div class="buttons" key={object.objectId}>
+                                                <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: object.objectId })} onClick={this.handleStatus} >
+                                                    {object.objectName} {object.objectId} {object.x}
+                                                </button>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                                : <div style={{ height: '250px', overflowY: 'auto' }}>
+                                    <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Where to place the object you're holding:</label>
+                                    {
+                                        positions.map((position) => (
+                                            <div class="buttons" key={position.name}>
+                                                <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "drop", args: position.pos })} onClick={this.handleStatus} >
+                                                    {position.name} {position.pos.x} {position.pos.y} {position.pos.z}
+                                                </button>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="box">
+                            <div class="field">
+                                <label class="label" style={{ fontSize: '1.7vw', width: '500px' }}>Chat box</label>
+                                <div className="chat">
+                                    <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
+                                        {
+                                            chats.map((singleChat) => (
+                                                <div class="box" key={singleChat.chatid}>
+                                                    <strong>{singleChat.owner.toUpperCase()}</strong> <small>{singleChat.created}</small>
+                                                    <br />
+                                                    {singleChat.text}
+                                                </div>
+                                            ))
+                                        }
                                     </div>
+                                    <form onSubmit={this.handleNewComment}>
+                                        <div class="field">
+                                            <strong>You ({document.body.id}) </strong>
+                                            <div class="control">
+                                                <textarea class="textarea" placeholder="Leave your message " value={value} onChange={this.handleChange}></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="control">
+                                            <button class="button is-link">Submit</button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <div class="control">
-                                    <button class="button is-link">Submit</button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-
-
-                {/* Add Text Box Here */}
-
             </div>
-
         );
     }
 }
