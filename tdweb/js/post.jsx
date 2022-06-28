@@ -14,7 +14,7 @@ class Post extends React.Component {
             obj: [],
             positions: [],
             status: '', //PICK or DROP
-            task: '',
+            task: [],
         };
         this.handleNewComment = this.handleNewComment.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -76,9 +76,9 @@ class Post extends React.Component {
                         num: data.num,
                     });
                 }
-                this.setState({
-                    task: data.task
-                })
+                // this.setState({
+                //     task: data.task
+                // })
             })
             .catch((error) => console.log(error));
     }
@@ -118,8 +118,8 @@ class Post extends React.Component {
         // console.log("handle status here");
         const { status } = this.state;
         // console.log(status);
-        const {player, cmd, args} = JSON.parse(event.target.value);
-        if (status=="PICK") {
+        const { player, cmd, args } = JSON.parse(event.target.value);
+        if (status == "PICK") {
             clearInterval(this.setChecker2);
         }
         else {
@@ -131,7 +131,7 @@ class Post extends React.Component {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ player:player, cmd:cmd, args:args }),
+            body: JSON.stringify({ player: player, cmd: cmd, args: args }),
         })
             .then((response) => {
                 if (!response.ok) throw Error(response.statusText);
@@ -139,26 +139,27 @@ class Post extends React.Component {
             })
             .then((data) => {
                 this.setState({
-                    status: (status=="PICK") ? "DROP" : "PICK",
+                    status: (status == "PICK") ? "DROP" : "PICK",
                 });
             })
             .catch((error) => console.log(error));
-        
+
     }
 
     render() {
-        const { chats, value, obj, status, positions } = this.state
-        console.log("status")
-        console.log(status)
+        const { chats, value, obj, status, positions, task } = this.state
+        console.log(obj)
+        console.log("task")
+        console.log(task)
         // console.log(positions)
         let vidUrl
-        if(document.body.id == "player1"){
+        if (document.body.id == "player1") {
             vidUrl = "/video1"
         }
-        else if(document.body.id == "player2"){
+        else if (document.body.id == "player2") {
             vidUrl = "/video2"
         }
-        else{
+        else {
             throw Error("wrong body id")
         }
         return (
@@ -169,10 +170,13 @@ class Post extends React.Component {
                             <img src={vidUrl} />
                         </div>
                         <div class="box">
-                            <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
+                            <div style={{ height: '350px', overflowY: 'auto' }}>
+                                <label class="label" style={{ fontSize: '1.7vw' }}>Complete Tasks Below</label>
                                 {
-                                    memo.map((m)=>(
-                                        <div class="box" key={m}>{m}<br></br></div>
+                                    task.map((tk) => (
+                                        <div class="box" key={tk}>
+                                            {tk}
+                                        </div>
                                     ))
                                 }
                             </div>
@@ -182,29 +186,37 @@ class Post extends React.Component {
                     <div>
                         <div class="box">
                             {status == "PICK"
-                                ? <div style={{ height: '250px', overflowY: 'auto' }}>
-                                    <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Objects:</label>
-                                    {
-                                        obj.map((object) => (
-                                            <div class="buttons" key={object.objectId}>
-                                                <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: object.objectId })} onClick={this.handleStatus} >
-                                                    {object.objectName} {object.objectId} {object.x}
-                                                </button>
-                                            </div>
-                                        ))
-                                    }
+                                ? <div style={{ height: '200px', overflowY: 'auto' }}>
+                                    <label class="label" style={{ fontSize: '1.5vw'}}>Select Objects:</label>
+                                    <label class="label" style={{ fontSize: '1.1vw' }}>Some objects are beyond your reach. You may ask your partner for help!</label>
+                                    
+                                    <div class="buttons" >
+                                        {
+                                            obj.map((object) => (
+                                                object.reachable
+                                                    ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: object.objectId })} onClick={this.handleStatus} >
+                                                        {object.objectName}
+                                                    </button>
+                                                    : <button class="button is-link is-outlined" disabled>
+                                                        {object.objectName} 
+                                                        {/* {object.x} {object.y} {object.z} */}
+                                                    </button>
+                                            ))
+                                        }
+                                    </div>
+                                    
                                 </div>
-                                : <div style={{ height: '250px', overflowY: 'auto' }}>
-                                    <label class="label" style={{ fontSize: '1vw', width: '250px' }}>Select Where to place the object you're holding:</label>
-                                    {
-                                        positions.map((position) => (
-                                            <div class="buttons" key={position.name}>
+                                : <div style={{ height: '200px', overflowY: 'auto' }}>
+                                    <label class="label" style={{ fontSize: '1.4vw' }}>Select Where to place the object you're holding:</label>
+                                    <div class="buttons" >
+                                        {
+                                            positions.map((position) => (
                                                 <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "drop", args: position.pos })} onClick={this.handleStatus} >
-                                                    {position.name} {position.pos.x} {position.pos.y} {position.pos.z}
+                                                    {position.name}
                                                 </button>
-                                            </div>
-                                        ))
-                                    }
+                                            ))
+                                        }
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -249,7 +261,7 @@ class Post extends React.Component {
 
 Post.propTypes = {
     url: PropTypes.string.isRequired,
-    url: PropTypes.string.isRequired,
+    url2: PropTypes.string.isRequired,
 };
 
 

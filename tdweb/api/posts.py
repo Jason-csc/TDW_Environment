@@ -38,19 +38,9 @@ def db_get_chats():
 
 def get_task(player):
     # TODO: Generate Task for each player
-    # for objectid,res in metadata["objList"].items():
-    #     objectname = res["name"]
-    return dummy_tasks()
-
-def dummy_tasks():
-    candidates = ['a','b','c','d','e','f','g']
-    tasks = []
-    sz = random.randint(1,len(candidates)-1)
-    for i in range(sz):
-        tasks.append(candidates[random.randint(1,len(candidates)-1)])
-    # print(*memo)
-    return tasks
-
+    if not player in ["player1","player2"]:
+        raise RuntimeError("Error: wrong playerid")
+    return metadata["task"][player]
 
 
 
