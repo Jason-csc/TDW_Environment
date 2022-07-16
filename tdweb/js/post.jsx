@@ -148,6 +148,7 @@ class Post extends React.Component {
 
     render() {
         const { chats, value, obj, status, positions, task } = this.state
+        const mode = Boolean(document.body.mode == "players")
         console.log(obj)
         console.log("task")
         console.log(task)
@@ -194,12 +195,13 @@ class Post extends React.Component {
                                         {
                                             obj.map((object) => (
                                                 object.reachable
-                                                    ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: object.objectId })} onClick={this.handleStatus} >
+                                                    ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: [object.objectId, object.x] })} onClick={this.handleStatus} >
                                                         {object.objectName}
+                                                        {object.x} {object.y} {object.z}
                                                     </button>
                                                     : <button class="button is-link is-outlined" disabled>
-                                                        {object.objectName} 
-                                                        {/* {object.x} {object.y} {object.z} */}
+                                                        {object.objectName}
+                                                        {object.x} {object.y} {object.z}
                                                     </button>
                                             ))
                                         }
@@ -212,7 +214,7 @@ class Post extends React.Component {
                                         {
                                             positions.map((position) => (
                                                 <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "drop", args: position.pos })} onClick={this.handleStatus} >
-                                                    {position.name}
+                                                    {position.name} {position.x} {position.y} {position.z}
                                                 </button>
                                             ))
                                         }
@@ -220,36 +222,38 @@ class Post extends React.Component {
                                 </div>
                             }
                         </div>
-
-                        <div class="box">
-                            <div class="field">
-                                <label class="label" style={{ fontSize: '1.7vw', width: '500px' }}>Chat box</label>
-                                <div className="chat">
-                                    <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
-                                        {
-                                            chats.map((singleChat) => (
-                                                <div class="box" key={singleChat.chatid}>
-                                                    <strong>{singleChat.owner.toUpperCase()}</strong> <small>{singleChat.created}</small>
-                                                    <br />
-                                                    {singleChat.text}
+                        {mode
+                            ? <div class="box">
+                                <div class="field">
+                                    <label class="label" style={{ fontSize: '1.7vw', width: '500px' }}>Chat box</label>
+                                    <div className="chat">
+                                        <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
+                                            {
+                                                chats.map((singleChat) => (
+                                                    <div class="box" key={singleChat.chatid}>
+                                                        <strong>{singleChat.owner.toUpperCase()}</strong> <small>{singleChat.created}</small>
+                                                        <br />
+                                                        {singleChat.text}
+                                                    </div>
+                                                ))
+                                            }
+                                        </div>
+                                        <form onSubmit={this.handleNewComment}>
+                                            <div class="field">
+                                                <strong>You ({document.body.id}) </strong>
+                                                <div class="control">
+                                                    <textarea class="textarea" placeholder="Leave your message " value={value} onChange={this.handleChange}></textarea>
                                                 </div>
-                                            ))
-                                        }
-                                    </div>
-                                    <form onSubmit={this.handleNewComment}>
-                                        <div class="field">
-                                            <strong>You ({document.body.id}) </strong>
-                                            <div class="control">
-                                                <textarea class="textarea" placeholder="Leave your message " value={value} onChange={this.handleChange}></textarea>
                                             </div>
-                                        </div>
-                                        <div class="control">
-                                            <button class="button is-link">Submit</button>
-                                        </div>
-                                    </form>
+                                            <div class="control">
+                                                <button class="button is-link">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            : <></>
+                        }
                     </div>
                 </div>
             </div>

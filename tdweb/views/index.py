@@ -39,14 +39,12 @@ prev2 = None
 
 
 
-
 @tdweb.app.route('/player1/',methods=['GET'])
 def show_player1():
     """Display / route."""
     if not metadata["start"]:
         thread = threading.Thread(target=startMultiTDW,args=(metadata,))
         thread.start()
-        # TO be fixed: DUMMY ADD CMD
     while True:
         if metadata["prepared"]:
             break
@@ -63,6 +61,18 @@ def show_player2():
     context = {}
     return flask.render_template("index2.html", **context)
 
+
+@tdweb.app.route('/player_bot/',methods=['GET'])
+def show_player_bot():
+    """Display / route."""
+    if not metadata["start"]:
+        thread = threading.Thread(target=startMultiTDW,args=(metadata,))
+        thread.start()
+    while True:
+        if metadata["prepared"]:
+            break
+    context = {}
+    return flask.render_template("index3.html", **context)
 
 
 def generate_frames1():

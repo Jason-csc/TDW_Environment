@@ -9,7 +9,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 pip install -e .
 npm ci .
-npm install chromedriver --detect_chromedriver_version --no-save
+# npm install chromedriver --detect_chromedriver_version --no-save
 
 
 wget https://github.com/threedworld-mit/tdw/releases/download/v1.10.0/TDW_Linux.tar.gz

@@ -1,4 +1,5 @@
 from itertools import permutations
+import random
 from random import shuffle, choice
 import json
 
@@ -86,18 +87,20 @@ def play_game(knowledge_split, ability_split, game, blocks):
     
     return json.dumps(reprez,indent=2)
 
-blocks = [Block(i,i%4) for i in range(8)]
-
-games = game_maker([], blocks)
-shuffle(games)
 
 
+def generate_game():
+    random.seed(7)
+    blocks = [Block(i,i%4) for i in range(8)]
 
-ability_splits = list(set(list(permutations([0]*(len(blocks)//2)+[1]*(len(blocks) - len(blocks)//2))) + (len(blocks)%2)*list(permutations([1]*(len(blocks)//2)+[0]*(len(blocks) - len(blocks)//2)))))
-game  = choice(games)
+    games = game_maker([], blocks)
+    shuffle(games)
 
-knowledge_splits = list(set(sum([list(set(permutations([1]+[0]*a+[2]*b+[1]*(len(game)-a-b-1)))) for a in range(1,len(game)-3) for b in range(a,len(game)-a-2)],[])))
+    ability_splits = list(set(list(permutations([0]*(len(blocks)//2)+[1]*(len(blocks) - len(blocks)//2))) + (len(blocks)%2)*list(permutations([1]*(len(blocks)//2)+[0]*(len(blocks) - len(blocks)//2)))))
+    game  = choice(games)
 
-ability_splits = list(set(list(permutations([0]*(len(blocks)//2)+[1]*(len(blocks) - len(blocks)//2))) + (len(blocks)%2)*list(permutations([1]*(len(blocks)//2)+[0]*(len(blocks) - len(blocks)//2)))))
+    knowledge_splits = list(set(sum([list(set(permutations([1]+[0]*a+[2]*b+[1]*(len(game)-a-b-1)))) for a in range(1,len(game)-3) for b in range(a,len(game)-a-2)],[])))
 
-print(play_game(choice(knowledge_splits), choice(ability_splits), game, blocks))
+    ability_splits = list(set(list(permutations([0]*(len(blocks)//2)+[1]*(len(blocks) - len(blocks)//2))) + (len(blocks)%2)*list(permutations([1]*(len(blocks)//2)+[0]*(len(blocks) - len(blocks)//2)))))
+
+    return play_game(choice(knowledge_splits), choice(ability_splits), game, blocks)
