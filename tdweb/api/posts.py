@@ -1,5 +1,6 @@
 """REST API for posts."""
 from asyncio import tasks
+from curses import meta
 import flask
 import tdweb
 from tdweb import metadata as metadata
@@ -38,8 +39,10 @@ def db_get_chats():
 
 def get_task(player):
     # TODO: Generate Task for each player
-    if not player in ["player1","player2"]:
+    if not player in ["player1","player2","player_bot"]:
         raise RuntimeError("Error: wrong playerid")
+    if player == "player_bot":
+        player = "player1"
     return metadata["task"][player]
 
 
@@ -53,7 +56,7 @@ def get_chats_pos():
     # get positions & status
     if player is not None:
         context["positions"] = []
-        if player == "player1":
+        if player in ["player1", "player_bot"]:
             context["status"] = metadata["status1"]
             for tmp in metadata["placePos1"]:
                 context["positions"].append(tmp)
@@ -62,7 +65,7 @@ def get_chats_pos():
             for tmp in metadata["placePos2"]:
                 context["positions"].append(tmp)
         else:
-            raise RuntimeError("Error: wrong playerid")
+            raise RuntimeError(f"Error: wrong playerid {player}")
     
         context["task"] = get_task(player)
 
@@ -83,11 +86,9 @@ def add_chats():
         'INSERT INTO chats(owner, text) VALUES (?,?);',
         (owner,text)
     )
-    # print(f"insert {owner} {text}")
-    
     context = db_get_chats()
-    # print(context)
     return flask.jsonify(**context), 200
+
 
 @tdweb.app.route('/api/v1/objlist/', methods=['GET'])
 def get_obj():    
@@ -101,16 +102,36 @@ def get_obj():
         tmp["x"] = float(res["position"][0])
         tmp["y"] = float(res["position"][1])
         tmp["z"] = float(res["position"][2])
-        if player == "player1":
+        if player in ["player1", "player_bot"]:
             tmp["reachable"] = res["reachable1"]
             context["obj"].append(tmp)
         elif player == "player2":
             tmp["reachable"] = res["reachable2"]
             context["obj"].append(tmp)
         else:
-            raise RuntimeError("Error: wrong playerid")
+            raise RuntimeError(f"Error: wrong playerid {player}")
     return flask.jsonify(**context), 200
 
+
+@tdweb.app.route('/api/v1/shareInfo/', methods=['GET'])
+def get_shareInfo():
+    context = {}
+    context["shareInfo"] = metadata["shareInfo"]
+    return flask.jsonify(**context), 200
+
+
+@tdweb.app.route('/api/v1/addInfo/', methods=['POST'])
+def add_shareInfo():
+    info = flask.request.json.get('info')
+    player = flask.request.json.get('player')
+    if info is None or player is None:
+        flask.abort(404)
+    shareInfo = {"player":player, "info":info}
+    if not shareInfo in metadata["shareInfo"]:
+        metadata["shareInfo"].append(shareInfo)
+    context = {}
+    context["shareInfo"] = metadata["shareInfo"]
+    return flask.jsonify(**context), 200
 
 
 
@@ -124,7 +145,7 @@ def send_control():
     if cmd is None or args is None or player is None:
         flask.abort(404)
     command = {"type": cmd, "args": args}
-    if player == "player1":
+    if player in ["player1", "player_bot"]:
         metadata["cmds1"].append(command)
     elif player == "player2":
         metadata["cmds2"].append(command)

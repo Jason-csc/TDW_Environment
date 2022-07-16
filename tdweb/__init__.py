@@ -21,7 +21,7 @@ metadata["placePos2"] = []
 metadata["status1"] = ["PICK"]
 metadata["status2"] = ["PICK"]
 metadata["task"] = {}
-
+metadata["shareInfo"] = []
 
 
 import tdweb.views  # noqa: E402  pylint: disable=wrong-import-position

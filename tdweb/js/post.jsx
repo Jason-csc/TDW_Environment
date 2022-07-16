@@ -15,17 +15,24 @@ class Post extends React.Component {
             positions: [],
             status: '', //PICK or DROP
             task: [],
+            shareInfo: [],
         };
         this.handleNewComment = this.handleNewComment.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleStatus = this.handleStatus.bind(this);
+        this.handleNewInfo = this.handleNewInfo.bind(this);
     }
 
 
 
     componentDidMount() {
-        this.setChecker = setInterval(this.checkdbchat.bind(this), 300);
-        this.setChecker2 = setInterval(this.checkdbobj.bind(this), 400);
+        if (document.body.id == "player1" || document.body.id == "player2") {
+            this.setChecker_chat = setInterval(this.checkdbchat.bind(this), 300);
+        }
+        else if (document.body.id == "player_bot") {
+            this.setChecker_info = setInterval(this.checkshareInfo.bind(this), 300);
+        }
+        this.setChecker_obj = setInterval(this.checkdbobj.bind(this), 400);
         const { url } = this.props;
         fetch(`${url}?player=${document.body.id}`, { credentials: 'same-origin' })
             .then((response) => {
@@ -76,12 +83,26 @@ class Post extends React.Component {
                         num: data.num,
                     });
                 }
-                // this.setState({
-                //     task: data.task
-                // })
             })
             .catch((error) => console.log(error));
     }
+
+    checkshareInfo() {
+        const { url3 } = this.props;
+        fetch(url3, { credentials: 'same-origin' })
+            .then((response) => {
+                if (!response.ok) throw Error(response.statusText);
+                return response.json();
+            })
+            .then((data) => {
+                this.setState({
+                    shareInfo: data.shareInfo,
+                });
+            })
+            .catch((error) => console.log(error));
+
+    }
+
 
     handleNewComment(event) {
         const { value } = this.state;
@@ -115,15 +136,13 @@ class Post extends React.Component {
     }
 
     handleStatus(event) {
-        // console.log("handle status here");
-        const { status } = this.state;
-        // console.log(status);
+        const { status } = this.state
         const { player, cmd, args } = JSON.parse(event.target.value);
         if (status == "PICK") {
-            clearInterval(this.setChecker2);
+            clearInterval(this.setChecker_obj);
         }
         else {
-            this.setChecker2 = setInterval(this.checkdbobj.bind(this), 400);
+            this.setChecker_obj = setInterval(this.checkdbobj.bind(this), 400);
         }
         fetch(`/api/v1/sendcmd/`, {
             method: 'POST',
@@ -146,15 +165,34 @@ class Post extends React.Component {
 
     }
 
+    handleNewInfo(event) {
+        const { player, info } = JSON.parse(event.target.value);
+        fetch(`/api/v1/addInfo/`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ player: player, info: info }),
+        })
+            .then((response) => {
+                if (!response.ok) throw Error(response.statusText);
+                return response.json();
+            })
+            .then((data) => {
+                this.setState({
+                    shareInfo: data.shareInfo,
+                });
+            })
+            .catch((error) => console.log(error));
+    }
+
     render() {
-        const { chats, value, obj, status, positions, task } = this.state
-        const mode = Boolean(document.body.mode == "players")
-        console.log(obj)
-        console.log("task")
-        console.log(task)
-        // console.log(positions)
+        const { chats, value, obj, status, positions, task, shareInfo } = this.state
+        const mode = Boolean(document.body.id == "player1" || document.body.id == "player2")
+        console.log(mode)
         let vidUrl
-        if (document.body.id == "player1") {
+        if (document.body.id == "player1" || document.body.id == "player_bot") {
             vidUrl = "/video1"
         }
         else if (document.body.id == "player2") {
@@ -171,16 +209,31 @@ class Post extends React.Component {
                             <img src={vidUrl} />
                         </div>
                         <div class="box">
-                            <div style={{ height: '350px', overflowY: 'auto' }}>
-                                <label class="label" style={{ fontSize: '1.7vw' }}>Complete Tasks Below</label>
-                                {
-                                    task.map((tk) => (
-                                        <div class="box" key={tk}>
-                                            {tk}
-                                        </div>
-                                    ))
-                                }
-                            </div>
+                            {mode
+                                ? <div style={{ height: '350px', overflowY: 'auto' }}>
+                                    <label class="label" style={{ fontSize: '1.7vw' }}>Complete Tasks Below</label>
+                                    {
+                                        task.map((tk) => (
+                                            <div class="box" key={tk}>
+                                                {tk}
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                                : <div style={{ height: '500px', width: '450px' }}>
+                                    <label class="label" style={{ fontSize: '1.7vw' }}>Complete Tasks Below</label>
+                                    <label class="label" style={{ fontSize: '1.4vw' }}>You can click to share with your partner</label>
+                                    <div class="buttons" >
+                                        {
+                                            task.map((tk) => (
+                                                <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, info: tk })} onClick={this.handleNewInfo} style={{ fontSize: '1.1vw' }}>
+                                                    {tk}
+                                                </button>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
 
@@ -188,25 +241,25 @@ class Post extends React.Component {
                         <div class="box">
                             {status == "PICK"
                                 ? <div style={{ height: '200px', overflowY: 'auto' }}>
-                                    <label class="label" style={{ fontSize: '1.5vw'}}>Select Objects:</label>
+                                    <label class="label" style={{ fontSize: '1.5vw' }}>Select Objects:</label>
                                     <label class="label" style={{ fontSize: '1.1vw' }}>Some objects are beyond your reach. You may ask your partner for help!</label>
-                                    
+
                                     <div class="buttons" >
                                         {
                                             obj.map((object) => (
                                                 object.reachable
                                                     ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: [object.objectId, object.x] })} onClick={this.handleStatus} >
                                                         {object.objectName}
-                                                        {object.x} {object.y} {object.z}
+                                                        {/* {object.x} {object.y} {object.z} */}
                                                     </button>
                                                     : <button class="button is-link is-outlined" disabled>
                                                         {object.objectName}
-                                                        {object.x} {object.y} {object.z}
+                                                        {/* {object.x} {object.y} {object.z} */}
                                                     </button>
                                             ))
                                         }
                                     </div>
-                                    
+
                                 </div>
                                 : <div style={{ height: '200px', overflowY: 'auto' }}>
                                     <label class="label" style={{ fontSize: '1.4vw' }}>Select Where to place the object you're holding:</label>
@@ -252,7 +305,32 @@ class Post extends React.Component {
                                     </div>
                                 </div>
                             </div>
-                            : <></>
+                            : <div class="box">
+                                <label class="label" style={{ fontSize: '1.6vw' }}>Shared Info</label>
+                                <div style={{ height: '500px', overflowY: 'auto' }}>
+                                    {
+                                        shareInfo.map((si) => (
+                                            si.player == document.body.id
+                                                ? <article class="message is-small">
+                                                    <div class="message-header">
+                                                        <p>Shared by You</p>
+                                                        </div>
+                                                    <div class="message-body" style={{ fontSize: '1.15vw' }}>
+                                                        {si.info}
+                                                    </div>
+                                                </article>
+                                                : <article class="message is-info is-small">
+                                                    <div class="message-header">
+                                                        <p>Shared by {si.player}</p>
+                                                    </div>
+                                                    <div class="message-body" style={{ fontSize: '1.15vw' }}>
+                                                        {si.info}
+                                                    </div>
+                                                </article>
+                                        ))
+                                    }
+                                </div>
+                            </div>
                         }
                     </div>
                 </div>
@@ -266,6 +344,7 @@ class Post extends React.Component {
 Post.propTypes = {
     url: PropTypes.string.isRequired,
     url2: PropTypes.string.isRequired,
+    url3: PropTypes.string.isRequired,
 };
 
 
