@@ -3,6 +3,7 @@ tdwebindex (main) view.
 URLs include:
 /
 """
+from curses import meta
 import flask
 from flask import Flask,render_template,Response
 import tdweb
@@ -11,6 +12,7 @@ import numpy as np
 import time
 import numpy 
 
+from tdweb.tdwHandler.bot import startbot
 from tdweb.tdwHandler.MultiTDW import startMultiTDW
 from tdweb import metadata as metadata
 
@@ -71,6 +73,8 @@ def show_player_bot():
     while True:
         if metadata["prepared"]:
             break
+    thread_bot = threading.Thread(target=startbot, args=(metadata,))
+    thread_bot.start()
     context = {}
     return flask.render_template("index3.html", **context)
 

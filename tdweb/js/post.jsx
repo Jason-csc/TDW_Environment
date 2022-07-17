@@ -240,7 +240,7 @@ class Post extends React.Component {
                     <div>
                         <div class="box">
                             {status == "PICK"
-                                ? <div style={{ height: '200px', overflowY: 'auto' }}>
+                                ? <div style={{ height: '170px', overflowY: 'auto' }}>
                                     <label class="label" style={{ fontSize: '1.5vw' }}>Select Objects:</label>
                                     <label class="label" style={{ fontSize: '1.1vw' }}>Some objects are beyond your reach. You may ask your partner for help!</label>
 
@@ -261,7 +261,7 @@ class Post extends React.Component {
                                     </div>
 
                                 </div>
-                                : <div style={{ height: '200px', overflowY: 'auto' }}>
+                                : <div style={{ height: '170px', overflowY: 'auto' }}>
                                     <label class="label" style={{ fontSize: '1.4vw' }}>Select Where to place the object you're holding:</label>
                                     <div class="buttons" >
                                         {
@@ -307,7 +307,7 @@ class Post extends React.Component {
                             </div>
                             : <div class="box">
                                 <label class="label" style={{ fontSize: '1.6vw' }}>Shared Info</label>
-                                <div style={{ height: '500px', overflowY: 'auto' }}>
+                                <div style={{ height: '500px', width: '600px', overflowY: 'auto' }}>
                                     {
                                         shareInfo.map((si) => (
                                             si.player == document.body.id

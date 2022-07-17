@@ -1,4 +1,3 @@
-from unicodedata import category
 from tdw.controller import Controller
 from tdw.tdw_utils import TDWUtils
 from tdw.add_ons.third_person_camera import ThirdPersonCamera
@@ -95,7 +94,7 @@ class PDRobot(Magnebot):
                                 "z": drop_pos["z"]
                                 }, 
                                 arm=self.arm,
-                                arrived_at = 0.1,
+                                arrived_at = 0.11,
                                 target_orientation=TargetOrientation.none, 
                                 orientation_mode=OrientationMode.none)      
                 self.state = State.grasp_back
@@ -130,12 +129,12 @@ class PDRobot(Magnebot):
                     self.reset = 0
                     drop_pos = self.cmd["args"]
                     self.reach_for(target={
-                                "x": drop_pos["x"], 
-                                "y": self.table_top["y"]+0.03, 
-                                "z": drop_pos["z"]
+                                "x": drop_pos["x"]*(1+random.uniform(-0.01,0.01)),
+                                "y": self.table_top["y"]+0.03,
+                                "z": drop_pos["z"]*(1+random.uniform(-0.01,0.01))
                                 }, 
                                 arm=self.arm,
-                                arrived_at = 0.08,
+                                arrived_at = 0.1,
                                 target_orientation=TargetOrientation.none, 
                                 orientation_mode=OrientationMode.none)
                     self.state = State.drop
