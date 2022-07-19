@@ -20,7 +20,7 @@ metadata["placePos1"] = []
 metadata["placePos2"] = []
 metadata["status1"] = ["PICK"]
 metadata["status2"] = ["PICK"]
-metadata["task"] = {}
+metadata["task"] = {"player1":[], "player2":[]}
 metadata["shareInfo"] = []
 
 

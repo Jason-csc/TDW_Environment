@@ -191,6 +191,7 @@ class Post extends React.Component {
         const { chats, value, obj, status, positions, task, shareInfo } = this.state
         const mode = Boolean(document.body.id == "player1" || document.body.id == "player2")
         console.log(mode)
+        console.log(shareInfo)
         let vidUrl
         if (document.body.id == "player1" || document.body.id == "player_bot") {
             vidUrl = "/video1"
@@ -204,73 +205,85 @@ class Post extends React.Component {
         return (
             <div class="container">
                 <div class="columns">
-                    <div class="column is-6" id="vid">
+                    <div class="column is-3">
+                        {mode
+                            ? <div>
+                                <label class="label" style={{ fontSize: '1.5vw' }}>Complete Tasks Below</label>
+                                <div style={{ height: '500px', overflowY: 'auto' }}>
+                                    <article class="message is-dark">
+                                        {
+                                            task.map((tk) => (
+                                                <div key={tk} class="message-body is-dark" style={{ fontSize: '1.1vw' }}>
+                                                    {tk}
+                                                </div>
+                                            ))
+                                        }
+                                    </article>
+                                </div>
+                            </div>
+                            : <div style={{ height: '500px' }}>
+                                <label class="label" style={{ fontSize: '1.5vw' }}>Complete Tasks Below</label>
+                                <label class="label" style={{ fontSize: '1.3vw' }}>You can click to share with your partner</label>
+                                {/* <div class="buttons" > */}
+                                {
+                                    task.map((tk) => (
+                                        <div style={{ fontSize: '1.1vw' }}>
+                                            {/* {tk} {' '} */}
+                                            <button class="js-modal-trigger" value={JSON.stringify({ player: document.body.id, info: tk })} onClick={this.handleNewInfo} style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 87%)`, height: '80px', borderStyle: 'none'}}>
+                                                {tk}
+                                            </button>
+                                            <br />
+                                            <br />
+                                        </div>
+                                    ))
+                                }
+                                {/* </div> */}
+                            </div>
+                        }
+                    </div>
+
+                    <div class="column is-5" id="vid">
                         <div>
                             <img src={vidUrl} />
                         </div>
-                        <div class="box">
-                            {mode
-                                ? <div style={{ height: '350px', overflowY: 'auto' }}>
-                                    <label class="label" style={{ fontSize: '1.7vw' }}>Complete Tasks Below</label>
-                                    {
-                                        task.map((tk) => (
-                                            <div class="box" key={tk}>
-                                                {tk}
-                                            </div>
-                                        ))
-                                    }
-                                </div>
-                                : <div style={{ height: '500px', width: '450px' }}>
-                                    <label class="label" style={{ fontSize: '1.7vw' }}>Complete Tasks Below</label>
-                                    <label class="label" style={{ fontSize: '1.4vw' }}>You can click to share with your partner</label>
-                                    <div class="buttons" >
-                                        {
-                                            task.map((tk) => (
-                                                <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, info: tk })} onClick={this.handleNewInfo} style={{ fontSize: '1.1vw' }}>
-                                                    {tk}
-                                                </button>
-                                            ))
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
                     </div>
 
-                    <div>
+                    <div class="column" id="vid">
                         <div class="box">
                             {status == "PICK"
-                                ? <div style={{ height: '170px', overflowY: 'auto' }}>
+                                ? <div>
                                     <label class="label" style={{ fontSize: '1.5vw' }}>Select Objects:</label>
                                     <label class="label" style={{ fontSize: '1.1vw' }}>Some objects are beyond your reach. You may ask your partner for help!</label>
-
-                                    <div class="buttons" >
-                                        {
-                                            obj.map((object) => (
-                                                object.reachable
-                                                    ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: [object.objectId, object.x] })} onClick={this.handleStatus} >
-                                                        {object.objectName}
-                                                        {/* {object.x} {object.y} {object.z} */}
-                                                    </button>
-                                                    : <button class="button is-link is-outlined" disabled>
-                                                        {object.objectName}
-                                                        {/* {object.x} {object.y} {object.z} */}
-                                                    </button>
-                                            ))
-                                        }
+                                    <div style={{ height: '140px', overflowY: 'auto' }}>
+                                        <div class="buttons" >
+                                            {
+                                                obj.map((object) => (
+                                                    object.reachable
+                                                        ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: [object.objectId, object.x] })} onClick={this.handleStatus} >
+                                                            {object.objectName}
+                                                            {/* {object.x} {object.y} {object.z} */}
+                                                        </button>
+                                                        : <button class="button is-link is-outlined" disabled>
+                                                            {object.objectName}
+                                                            {/* {object.x} {object.y} {object.z} */}
+                                                        </button>
+                                                ))
+                                            }
+                                        </div>
                                     </div>
-
                                 </div>
-                                : <div style={{ height: '170px', overflowY: 'auto' }}>
+                                : <div>
                                     <label class="label" style={{ fontSize: '1.4vw' }}>Select Where to place the object you're holding:</label>
-                                    <div class="buttons" >
-                                        {
-                                            positions.map((position) => (
-                                                <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "drop", args: position.pos })} onClick={this.handleStatus} >
-                                                    {position.name} {position.x} {position.y} {position.z}
-                                                </button>
-                                            ))
-                                        }
+                                    <div style={{ height: '130px', overflowY: 'auto' }}>
+                                        <div class="buttons" >
+                                            {
+                                                positions.map((position) => (
+                                                    <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "drop", args: position.pos })} onClick={this.handleStatus} >
+                                                        {position.name}
+                                                    </button>
+                                                ))
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             }
@@ -278,16 +291,26 @@ class Post extends React.Component {
                         {mode
                             ? <div class="box">
                                 <div class="field">
-                                    <label class="label" style={{ fontSize: '1.7vw', width: '500px' }}>Chat box</label>
+                                    <label class="label" style={{ fontSize: '1.5vw', width: '500px' }}>Chat box</label>
                                     <div className="chat">
-                                        <div style={{ height: '250px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
+                                        <div style={{ height: '200px', overflowY: 'auto', display: "flex", flexDirection: "column-reverse" }}>
                                             {
                                                 chats.map((singleChat) => (
-                                                    <div class="box" key={singleChat.chatid}>
-                                                        <strong>{singleChat.owner.toUpperCase()}</strong> <small>{singleChat.created}</small>
-                                                        <br />
-                                                        {singleChat.text}
-                                                    </div>
+                                                    singleChat.owner == "player1"
+                                                        ? <article class="message is-success">
+                                                            <div class="message-body" key={singleChat.chatid}>
+                                                                <strong>{singleChat.owner.toUpperCase()}</strong> <small>{singleChat.created}</small>
+                                                                <br />
+                                                                {singleChat.text}
+                                                            </div>
+                                                        </article>
+                                                        : <article class="message is-info">
+                                                            <div class="message-body" key={singleChat.chatid}>
+                                                                <strong>{singleChat.owner.toUpperCase()}</strong> <small>{singleChat.created}</small>
+                                                                <br />
+                                                                {singleChat.text}
+                                                            </div>
+                                                        </article>
                                                 ))
                                             }
                                         </div>
@@ -295,7 +318,7 @@ class Post extends React.Component {
                                             <div class="field">
                                                 <strong>You ({document.body.id}) </strong>
                                                 <div class="control">
-                                                    <textarea class="textarea" placeholder="Leave your message " value={value} onChange={this.handleChange}></textarea>
+                                                    <input class="input" type="text" placeholder="Leave your message " value={value} onChange={this.handleChange}></input>
                                                 </div>
                                             </div>
                                             <div class="control">
@@ -306,16 +329,16 @@ class Post extends React.Component {
                                 </div>
                             </div>
                             : <div class="box">
-                                <label class="label" style={{ fontSize: '1.6vw' }}>Shared Info</label>
-                                <div style={{ height: '500px', width: '600px', overflowY: 'auto' }}>
+                                <label class="label" style={{ fontSize: '1.5vw' }}>Shared Info</label>
+                                <div style={{ height: '400px', width: '500px', overflowY: 'auto' }}>
                                     {
                                         shareInfo.map((si) => (
                                             si.player == document.body.id
                                                 ? <article class="message is-small">
                                                     <div class="message-header">
                                                         <p>Shared by You</p>
-                                                        </div>
-                                                    <div class="message-body" style={{ fontSize: '1.15vw' }}>
+                                                    </div>
+                                                    <div class="message-body" style={{ fontSize: '1.15vw', height: '75px' }}>
                                                         {si.info}
                                                     </div>
                                                 </article>
@@ -323,7 +346,7 @@ class Post extends React.Component {
                                                     <div class="message-header">
                                                         <p>Shared by {si.player}</p>
                                                     </div>
-                                                    <div class="message-body" style={{ fontSize: '1.15vw' }}>
+                                                    <div class="message-body" style={{ fontSize: '1.15vw', height: '75px'}}>
                                                         {si.info}
                                                     </div>
                                                 </article>

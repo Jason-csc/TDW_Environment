@@ -130,7 +130,7 @@ class PDRobot(Magnebot):
                     drop_pos = self.cmd["args"]
                     self.reach_for(target={
                                 "x": drop_pos["x"]*(1+random.uniform(-0.01,0.01)),
-                                "y": self.table_top["y"]+0.03,
+                                "y": self.table_top["y"]+0.031,
                                 "z": drop_pos["z"]*(1+random.uniform(-0.01,0.01))
                                 }, 
                                 arm=self.arm,
@@ -314,7 +314,7 @@ class MultiMagnebot(Controller):
                                             object_id=bowl1_id1,
                                             ))
         bowl1_info1 = {"name":"Black Bowl", "pos":bowl1_pos1, "object_id":bowl1_id1}
-        commands.extend([{"$type": "scale_object", "id": bowl1_id1, "scale_factor": {"x": 0.45, "y": 0.18, "z": 0.45}}])
+        commands.extend([{"$type": "scale_object", "id": bowl1_id1, "scale_factor": {"x": 0.46, "y": 0.18, "z": 0.46}}])
         commands.extend([{"$type": "set_color", "color": {"r": 0, "g": 0.5, "b": 1, "a": 1}, "id": bowl1_id1}])
         # Bowl for player1 - 2
         bowl1_id2 = self.get_unique_id()
@@ -330,7 +330,7 @@ class MultiMagnebot(Controller):
                                             object_id=bowl1_id2,
                                             ))
         bowl1_info2 = {"name":"Green Bowl","pos":bowl1_pos2, "object_id":bowl1_id2}
-        commands.extend([{"$type": "scale_object", "id": bowl1_id2, "scale_factor": {"x": 0.45, "y": 0.18, "z": 0.45}}])
+        commands.extend([{"$type": "scale_object", "id": bowl1_id2, "scale_factor": {"x": 0.46, "y": 0.18, "z": 0.46}}])
         commands.extend([{"$type": "set_color", "color": {"r": 0, "g": 1, "b": 0, "a": 1}, "id": bowl1_id2}])
         # Bowl for player2 - 1
         bowl2_id1 = self.get_unique_id()
@@ -441,16 +441,16 @@ class MultiMagnebot(Controller):
                 tmp_x = tmp%3
                 tmp_z = tmp//3
                 pos_x = - 0.4 + (tmp_x*2+1)*0.82/6
-                pos_z = - (tmp_z*2+1)*0.32/6 - 0.04              
+                pos_z = - (tmp_z*2+1)*0.32/6 - 0.038              
             else:
                 owner = "player2"
                 tmp = object_pos2.pop()
                 tmp_x = tmp%3
                 tmp_z = tmp//3
                 pos_x = - 0.4 + (tmp_x*2+1)*0.82/6
-                pos_z = (tmp_z*2+1)*0.32/6 + 0.04
+                pos_z = (tmp_z*2+1)*0.32/6 + 0.038
             delta_x = random.uniform(-0.82/6*0.55, 0.82/6*0.55)
-            delta_z = random.uniform(-0.32/6*0.45, 0.32/6*0.45)
+            delta_z = random.uniform(-0.32/6*0.4, 0.32/6*0.45)
             pos = {
                     "x": self.table_top["x"] + pos_x + delta_x,
                     "y": self.table_top["y"],
