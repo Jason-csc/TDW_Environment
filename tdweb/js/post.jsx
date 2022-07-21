@@ -27,12 +27,12 @@ class Post extends React.Component {
 
     componentDidMount() {
         if (document.body.id == "player1" || document.body.id == "player2") {
-            this.setChecker_chat = setInterval(this.checkdbchat.bind(this), 300);
+            this.setChecker_chat = setInterval(this.checkdbchat.bind(this), 500);
         }
         else if (document.body.id == "player_bot") {
-            this.setChecker_info = setInterval(this.checkshareInfo.bind(this), 300);
+            this.setChecker_info = setInterval(this.checkshareInfo.bind(this), 500);
         }
-        this.setChecker_obj = setInterval(this.checkdbobj.bind(this), 400);
+        this.setChecker_obj = setInterval(this.checkdbobj.bind(this), 600);
         const { url } = this.props;
         fetch(`${url}?player=${document.body.id}`, { credentials: 'same-origin' })
             .then((response) => {
@@ -142,7 +142,7 @@ class Post extends React.Component {
             clearInterval(this.setChecker_obj);
         }
         else {
-            this.setChecker_obj = setInterval(this.checkdbobj.bind(this), 400);
+            this.setChecker_obj = setInterval(this.checkdbobj.bind(this), 500);
         }
         fetch(`/api/v1/sendcmd/`, {
             method: 'POST',
@@ -213,8 +213,8 @@ class Post extends React.Component {
                                     <article class="message is-dark">
                                         {
                                             task.map((tk) => (
-                                                <div key={tk} class="message-body is-dark" style={{ fontSize: '1.1vw' }}>
-                                                    {tk}
+                                                <div key={tk.task} class="message-body is-dark" style={{ fontSize: '1.1vw' }}>
+                                                    {tk.task}
                                                 </div>
                                             ))
                                         }
@@ -228,9 +228,8 @@ class Post extends React.Component {
                                 {
                                     task.map((tk) => (
                                         <div style={{ fontSize: '1.1vw' }}>
-                                            {/* {tk} {' '} */}
-                                            <button class="js-modal-trigger" value={JSON.stringify({ player: document.body.id, info: tk })} onClick={this.handleNewInfo} style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 87%)`, height: '80px', borderStyle: 'none'}}>
-                                                {tk}
+                                            <button class="js-modal-trigger" value={JSON.stringify({ player: document.body.id, info: tk.task })} onClick={this.handleNewInfo} style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 87%)`, height: '80px', borderStyle: 'none'}}>
+                                                {tk.task}
                                             </button>
                                             <br />
                                             <br />

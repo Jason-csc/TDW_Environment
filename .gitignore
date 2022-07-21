@@ -20,3 +20,7 @@ var
 TDW/
 
 tryTDW/
+
+
+tdweb/tdwHandler/objImage/*.py
+tdweb/tdwHandler/objImage/image_capture
