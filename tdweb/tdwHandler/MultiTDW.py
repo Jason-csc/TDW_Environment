@@ -71,7 +71,7 @@ class PDRobot(Magnebot):
         if self.cmd is None and len(self.cmdList) > 0:
             self.cmd = self.cmdList.pop(0)
             if self.cmd["type"] == "pick":
-                objID, obj_x = self.cmd["args"]
+                objID, obj_x, obj_y, obj_z = self.cmd["args"]
                 self.objID = int(objID)
                 delta_z = 0.42 if self.position["z"] > 0 else -0.42
                 if self.position["z"]*obj_x >  0:
@@ -95,16 +95,18 @@ class PDRobot(Magnebot):
                         self.cmd["args"]["z"] += random.uniform(-0.04,0)
                 elif self.cmd["args"]["x"]*self.cmd["args"]["z"] < 0 and self.arm == Arm.right:
                     self.cmd["args"]["x"] *= 1 + random.uniform(-0.15,-0.1)
+                    self.cmd["args"]["z"] *= 1 +random.uniform(-0.03,0.06)
                 elif self.cmd["args"]["x"]*self.cmd["args"]["z"] > 0:
                     self.cmd["args"]["x"] *= 1 + random.uniform(-0.15,-0.1)
+                    self.cmd["args"]["z"] *= 1 +random.uniform(-0.03,0.06)
                 drop_pos = self.cmd["args"]
                 self.reach_for(target={
                                 "x": drop_pos["x"], 
-                                "y": drop_pos["y"]+0.485, 
+                                "y": drop_pos["y"]+0.5, 
                                 "z": drop_pos["z"]
                                 }, 
                                 arm=self.arm,
-                                arrived_at = 0.09,
+                                arrived_at = 0.1,
                                 target_orientation=TargetOrientation.none, 
                                 orientation_mode=OrientationMode.none)      
                 self.state = State.grasp_back
@@ -119,11 +121,12 @@ class PDRobot(Magnebot):
                     self.status[0] = "DROP"
                 elif self.state == State.grasp_back and self.action.done:
                     self.reset = 0
+                    objID, obj_x, obj_y, obj_z = self.cmd["args"]
                     delta_z = 0.25 if self.position["z"] > 0 else -0.25
                     self.reach_for(target={
-                                    "x": self.table_top["x"], 
-                                    "y": self.table_top["y"]+0.46, 
-                                    "z": self.table_top["z"]+delta_z
+                                    "x": obj_x, 
+                                    "y": obj_y + 0.5, 
+                                    "z": obj_z
                                     }, 
                                     arm=self.arm,
                                     arrived_at = 0.1,
@@ -140,11 +143,11 @@ class PDRobot(Magnebot):
                     drop_pos = self.cmd["args"]
                     self.reach_for(target={
                                 "x": drop_pos["x"],
-                                "y": self.table_top["y"]+0.04,
+                                "y": self.table_top["y"]+0.042,
                                 "z": drop_pos["z"]
                                 }, 
                                 arm=self.arm,
-                                arrived_at = 0.07,
+                                arrived_at = 0.08,
                                 target_orientation=TargetOrientation.none, 
                                 orientation_mode=OrientationMode.none)
                     self.state = State.drop
@@ -185,7 +188,7 @@ class MultiMagnebot(Controller):
         self.table_top = {"x":-1.49850675e-05,  "y":6.65e-01, "z":-1.47134961e-06}
         # Create two robots with corresponding commands
         magnebot1_id = self.get_unique_id()
-        self.magnebot1 = PDRobot(position={"x": 0, "y": 0.46, "z": -0.823}, 
+        self.magnebot1 = PDRobot(position={"x": 0, "y": 0.46, "z": -0.83}, 
                                 rotation={"x": 0, "y": 0, "z": 0},
                                 robot_id=magnebot1_id,
                                 cmds=self.info["cmds1"],
@@ -193,7 +196,7 @@ class MultiMagnebot(Controller):
                                 table_top = self.table_top,
                                 objupdated_=self.objupdated)
         magnebot2_id = self.get_unique_id()
-        self.magnebot2 = PDRobot(position={"x": 0, "y": 0.46, "z": 0.823}, 
+        self.magnebot2 = PDRobot(position={"x": 0, "y": 0.46, "z": 0.83}, 
                                 rotation={"x": 0, "y": 180, "z": 0},
                                 robot_id=magnebot2_id,
                                 cmds=self.info["cmds2"],
@@ -267,6 +270,7 @@ class MultiMagnebot(Controller):
             random.shuffle(knowledge_list)
             for knowledge in knowledge_list:
                 task = {}
+                task["shared"] = False
                 if knowledge[0] == "inBin":
                     obj_id, bin_id = knowledge[1:]
                     obj_name = self.object_info[obj_id]['name']
@@ -368,7 +372,7 @@ class MultiMagnebot(Controller):
                                             dynamic_friction = 0,
                                             object_id=bowl2_id1,
                                             ))
-        commands.extend([{"$type": "scale_object", "id": bowl2_id1, "scale_factor": {"x": 0.34, "y": 0.06, "z": 0.34}}])
+        commands.extend([{"$type": "scale_object", "id": bowl2_id1, "scale_factor": {"x": 0.34, "y": 0.05, "z": 0.34}}])
         commands.extend([{"$type": "set_color", "color": {"r": 1, "g": 0.5, "b": 0, "a": 1}, "id": bowl2_id1}])
         bowl2_info1 = {"name":"Orange Bowl", "pos":bowl2_pos1, "object_id":bowl2_id1}
         # Bowl for player2 - 2
@@ -385,7 +389,7 @@ class MultiMagnebot(Controller):
                                             dynamic_friction = 0,
                                             object_id=bowl2_id2,
                                             ))
-        commands.extend([{"$type": "scale_object", "id": bowl2_id2, "scale_factor": {"x": 0.34, "y": 0.06, "z": 0.34}}])
+        commands.extend([{"$type": "scale_object", "id": bowl2_id2, "scale_factor": {"x": 0.34, "y": 0.05, "z": 0.34}}])
         commands.extend([{"$type": "set_color", "color": {"r": 0, "g": 0.4, "b": 1, "a": 1}, "id": bowl2_id2}])
         bowl2_info2 = {"name":"Blue Bowl","pos":bowl2_pos2, "object_id":bowl2_id2}
 
@@ -438,8 +442,8 @@ class MultiMagnebot(Controller):
         assert len(self.game_config["start_config"]["player2"])*2 == obj_number
 
         objects = random.sample(total_objects, obj_number)
-        object_pos1 = [(-0.36,-0.19),(-0.247,-0.09),(0.36,-0.19),(0.246,-0.09)]
-        object_pos2 = [(-0.36,0.19),(-0.246,0.09),(0.36,0.19),(0.246,0.09)]
+        object_pos1 = [(-0.32,-0.19),(-0.247,-0.09),(0.32,-0.19),(0.246,-0.09)]
+        object_pos2 = [(-0.32,0.19),(-0.246,0.09),(0.32,0.19),(0.246,0.09)]
         """
             Four center locations 'X' with random deviations
             z
@@ -483,11 +487,11 @@ class MultiMagnebot(Controller):
                                             dynamic_friction = 0,
                                             object_id=object_id))
             if shape[0] == "Battery":
-                scale = {"x": 2, "y": 2, "z": 2}
+                scale = {"x": 2, "y": 1.8, "z": 2}
             elif shape[0] == "Ball":
                 scale = {"x": 1.8, "y": 1.8, "z": 1.8}
             else:
-                scale = {"x": 1.2, "y": 1.1, "z": 1.2}
+                scale = {"x": 1.2, "y": 1, "z": 1.2}
             commands.extend([{"$type": "scale_object", "id": object_id, "scale_factor": scale}])
             if shape[0] == "Battery" and rgb[0] == "Green":
                 commands.extend([{"$type": "set_color", "color": {"r": 0, "g": 2, "b": 0, "a": 1}, "id": object_id}])
@@ -497,5 +501,5 @@ class MultiMagnebot(Controller):
 
 def startMultiTDW(info):
     info["start"] = True
-    c = MultiMagnebot(info=info, check_version=False, launch_build=True)
+    c = MultiMagnebot(info=info, check_version=False, launch_build=False)
     c.run()

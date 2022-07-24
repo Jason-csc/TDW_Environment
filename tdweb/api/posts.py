@@ -37,16 +37,6 @@ def db_get_chats():
 
 
 
-def get_task(player):
-    # TODO: Generate Task for each player
-    if not player in ["player1","player2","player_bot"]:
-        raise RuntimeError("Error: wrong playerid")
-    if player == "player_bot":
-        player = "player1"
-    return metadata["task"][player]
-
-
-
 @tdweb.app.route('/api/v1/chats/', methods=['GET'])
 def get_chats_pos():
     # get chats from database
@@ -66,9 +56,19 @@ def get_chats_pos():
                 context["positions"].append(tmp)
         else:
             raise RuntimeError(f"Error: wrong playerid {player}")
-    
-        context["task"] = get_task(player)
 
+    return flask.jsonify(**context), 200
+
+
+@tdweb.app.route('/api/v1/tasks/', methods=['GET'])
+def get_tasks():
+    player = flask.request.args.get("player")
+    if not player in ["player1","player2","player_bot"]:
+        raise RuntimeError("Error: wrong playerid")
+    if player == "player_bot":
+        player = "player1"
+    context = {}
+    context["task"] = metadata["task"][player]
     return flask.jsonify(**context), 200
 
 
@@ -124,11 +124,17 @@ def get_shareInfo():
 def add_shareInfo():
     info = flask.request.json.get('info')
     player = flask.request.json.get('player')
-    if info is None or player is None:
+    if info is None or not player == 'player_bot':
         flask.abort(404)
+    player = 'player1'
     shareInfo = {"player":player, "info":info}
-    if not shareInfo in metadata["shareInfo"]:
-        metadata["shareInfo"].append(shareInfo)
+    print("-----\n"*10)
+    for task in metadata["task"][player]:
+        print(task)
+        if task["task"] == info:
+            if not task["shared"]:
+                task["shared"] = True
+                metadata["shareInfo"].append(shareInfo)
     context = {}
     context["shareInfo"] = metadata["shareInfo"]
     return flask.jsonify(**context), 200

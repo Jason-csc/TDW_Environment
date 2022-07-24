@@ -33,6 +33,7 @@ class Post extends React.Component {
             this.setChecker_info = setInterval(this.checkshareInfo.bind(this), 500);
         }
         this.setChecker_obj = setInterval(this.checkdbobj.bind(this), 600);
+        this.setChecker_task = setInterval(this.checktask.bind(this), 600);
         const { url } = this.props;
         fetch(`${url}?player=${document.body.id}`, { credentials: 'same-origin' })
             .then((response) => {
@@ -46,8 +47,7 @@ class Post extends React.Component {
                     value: '',
                     obj: [],
                     positions: data.positions,
-                    status: data.status,
-                    task: data.task
+                    status: data.status
                 });
             })
             .catch((error) => console.log(error));
@@ -63,6 +63,21 @@ class Post extends React.Component {
             .then((data) => {
                 this.setState({
                     obj: data.obj
+                });
+                console.log(data);
+            })
+            .catch((error) => console.log(error));
+    }
+
+    checktask() {
+        fetch(`/api/v1/tasks/?player=${document.body.id}`, { credentials: 'same-origin' })
+            .then((response) => {
+                if (!response.ok) throw Error(response.statusText);
+                return response.json();
+            })
+            .then((data) => {
+                this.setState({
+                    task: data.task
                 });
                 console.log(data);
             })
@@ -191,7 +206,7 @@ class Post extends React.Component {
         const { chats, value, obj, status, positions, task, shareInfo } = this.state
         const mode = Boolean(document.body.id == "player1" || document.body.id == "player2")
         console.log(mode)
-        console.log(shareInfo)
+        console.log(task)
         let vidUrl
         if (document.body.id == "player1" || document.body.id == "player_bot") {
             vidUrl = "/video1"
@@ -224,19 +239,25 @@ class Post extends React.Component {
                             : <div style={{ height: '500px' }}>
                                 <label class="label" style={{ fontSize: '1.5vw' }}>Complete Tasks Below</label>
                                 <label class="label" style={{ fontSize: '1.3vw' }}>You can click to share with your partner</label>
-                                {/* <div class="buttons" > */}
                                 {
                                     task.map((tk) => (
-                                        <div style={{ fontSize: '1.1vw' }}>
-                                            <button class="js-modal-trigger" value={JSON.stringify({ player: document.body.id, info: tk.task })} onClick={this.handleNewInfo} style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 87%)`, height: '80px', borderStyle: 'none'}}>
-                                                {tk.task}
+                                        tk.shared
+                                            ? <div>
+                                                <button style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 85%)`, height: '80px', borderStyle: 'none' }} disabled>
+                                                    {tk.task}
+                                                </button>
+                                                <br />
+                                                <br />
+                                            </div>
+                                            : <div>
+                                            <button class="js-modal-trigger" value={JSON.stringify({ player: document.body.id, info: tk.task })} onClick={this.handleNewInfo} style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 85%)`, height: '80px', borderStyle: 'none' }}>
+                                               {tk.task}
                                             </button>
                                             <br />
                                             <br />
                                         </div>
                                     ))
                                 }
-                                {/* </div> */}
                             </div>
                         }
                     </div>
@@ -258,7 +279,7 @@ class Post extends React.Component {
                                             {
                                                 obj.map((object) => (
                                                     object.reachable
-                                                        ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: [object.objectId, object.x] })} onClick={this.handleStatus} >
+                                                        ? <button class="button is-link is-outlined" value={JSON.stringify({ player: document.body.id, cmd: "pick", args: [object.objectId, object.x, object.y, object.z] })} onClick={this.handleStatus} >
                                                             {object.objectName}
                                                             {/* {object.x} {object.y} {object.z} */}
                                                         </button>
@@ -333,19 +354,12 @@ class Post extends React.Component {
                                     {
                                         shareInfo.map((si) => (
                                             si.player == document.body.id
-                                                ? <article class="message is-small">
-                                                    <div class="message-header">
-                                                        <p>Shared by You</p>
-                                                    </div>
-                                                    <div class="message-body" style={{ fontSize: '1.15vw', height: '75px' }}>
-                                                        {si.info}
-                                                    </div>
-                                                </article>
+                                                ? <></>
                                                 : <article class="message is-info is-small">
                                                     <div class="message-header">
                                                         <p>Shared by {si.player}</p>
                                                     </div>
-                                                    <div class="message-body" style={{ fontSize: '1.15vw', height: '75px'}}>
+                                                    <div class="message-body" style={{ fontSize: '1.15vw', height: '70px', padding: '8px' }}>
                                                         {si.info}
                                                     </div>
                                                 </article>
