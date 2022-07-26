@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import InfoPicture from './infopicture';
 
 class TaskBox extends React.Component {
     constructor(props) {
@@ -32,7 +33,8 @@ class TaskBox extends React.Component {
                             {
                                 task.map((tk) => (
                                     <div key={tk.task} class="message-body is-dark" style={{ fontSize: '1.1vw' }}>
-                                        {tk.task}
+                                        {/* {tk.task} */}
+                                        <InfoPicture tk={tk} />
                                     </div>
                                 ))
                             }
@@ -51,14 +53,16 @@ class TaskBox extends React.Component {
                                 tk.shared
                                     ? <div>
                                         <button style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 85%)`, height: '80px', borderStyle: 'none' }} disabled>
-                                            {tk.task}
+                                            {/* {tk.task} */}
+                                            <InfoPicture tk={tk} />
                                         </button>
                                         <br />
                                         <br />
                                     </div>
                                     : <div>
-                                        <button class="js-modal-trigger" value={JSON.stringify({ player: player, info: tk.task })} onClick={this.handleInfo} style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 85%)`, height: '80px', borderStyle: 'none' }}>
-                                            {tk.task}
+                                        <button class="js-modal-trigger" value={JSON.stringify({ player: player, task: tk.task, objects: tk.objects, relation: tk.relation })} onClick={this.handleInfo} style={{ fontSize: '1.1vw', backgroundColor: `hsl(0, 0%, 85%)`, height: '80px', borderStyle: 'none' }}>
+                                            {/* {tk.task} */}
+                                            <InfoPicture tk={tk} />
                                         </button>
                                         <br />
                                         <br />
@@ -77,14 +81,16 @@ class TaskBox extends React.Component {
                                 tk.shared
                                     ? <div>
                                         <button style={{ fontSize: '1.1vw', borderColor: `hsl(0, 0%, 90%)`, height: '80px', borderStyle: 'solid' }} disabled>
-                                            {tk.task}
+                                            {/* {tk.task} */}
+                                            <InfoPicture tk={tk} />
                                         </button>
                                         <br />
                                         <br />
                                     </div>
                                     : <div>
                                         <button style={{ fontSize: '1.1vw', borderColor: `hsl(0, 0%, 75%)`, height: '80px', borderStyle: 'solid' }} disabled>
-                                            {tk.task}
+                                            {/* {tk.task} */}
+                                            <InfoPicture tk={tk} />
                                         </button>
                                         <br />
                                         <br />

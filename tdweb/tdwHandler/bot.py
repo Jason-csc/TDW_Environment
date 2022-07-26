@@ -34,10 +34,11 @@ def startbot(info):
                 print(f"Name: {pos['name']}")
                 print(f"Pos: {pos['pos']}")
             
-            # time.sleep(5)
+            time.sleep(5)
             
-            t = info["task"]["player2"][i]
-            info["shareInfo"].append({"player":"bot", "info":t["task"]})
+            t = info["task"]["player2"][i].copy()
+            t["player"] = "bot"
+            info["shareInfo"].append(t)
             i+=1
             
             """

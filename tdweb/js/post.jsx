@@ -18,7 +18,6 @@ class Post extends React.Component {
             positions: [],
             status: '', //PICK or DROP
             task: [],
-            shareInfo: [],
             canPick: true,
             canDrop: true,
             canShare: true,
@@ -72,7 +71,6 @@ class Post extends React.Component {
                 this.setState({
                     obj: data.obj
                 });
-                console.log(data);
             })
             .catch((error) => console.log(error));
     }
@@ -85,9 +83,10 @@ class Post extends React.Component {
             })
             .then((data) => {
                 this.setState({
-                    task: data.task
+                    task: data.tasks
                 });
-                console.log(data);
+                console.log("tasks")
+                console.log(data.tasks);
             })
             .catch((error) => console.log(error));
     }
@@ -207,14 +206,17 @@ class Post extends React.Component {
     }
 
     handleNewInfo(event) {
-        const { player, info } = JSON.parse(event.target.value);
+        console.log("bug1")
+        console.log(event.target.value)
+        console.log(JSON.parse(event.target.value))
+        const { player, task, objects, relation } = JSON.parse(event.target.value);
         fetch(`/api/v1/addInfo/`, {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ player: player, info: info }),
+            body: JSON.stringify({ player: player, task: task, objects: objects, relation: relation }),
         })
             .then((response) => {
                 if (!response.ok) throw Error(response.statusText);
@@ -225,7 +227,7 @@ class Post extends React.Component {
     }
 
     render() {
-        const { chats, value, obj, status, positions, task, shareInfo } = this.state
+        const { chats, value, obj, status, positions, task } = this.state
         const { canPick, canDrop, canShare, playerTurn } = this.state
         let vidUrl
         if (document.body.id == "player1" || document.body.id == "player_bot") {
@@ -263,7 +265,7 @@ class Post extends React.Component {
                         <ControlBox status={status} obj={obj} player={document.body.id} positions={positions} canPick={canPick} canDrop={canDrop} handleStatus={this.handleStatus} />
                         {document.body.id == "player1" || document.body.id == "player2"
                             ? <ChatBox player={document.body.id} chats={chats} value={value} handleChange={this.handleChange} handleNewComment={this.handleNewComment} />
-                            : <InfoBox info={shareInfo} />
+                            : <InfoBox />
                         }
                     </div>
                 </div>

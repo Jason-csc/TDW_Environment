@@ -442,8 +442,8 @@ class MultiMagnebot(Controller):
         assert len(self.game_config["start_config"]["player2"])*2 == obj_number
 
         objects = random.sample(total_objects, obj_number)
-        object_pos1 = [(-0.32,-0.19),(-0.247,-0.09),(0.32,-0.19),(0.246,-0.09)]
-        object_pos2 = [(-0.32,0.19),(-0.246,0.09),(0.32,0.19),(0.246,0.09)]
+        object_pos1 = [(-0.3,-0.19),(-0.247,-0.09),(0.3,-0.19),(0.246,-0.09)]
+        object_pos2 = [(-0.3,0.19),(-0.246,0.09),(0.3,0.19),(0.246,0.09)]
         """
             Four center locations 'X' with random deviations
             z
@@ -467,13 +467,11 @@ class MultiMagnebot(Controller):
                 pos_x, pos_z = object_pos1.pop()     
             else:
                 owner = "player2"
-                pos_x, pos_z = object_pos2.pop()  
-            delta_x = random.uniform(-0.03*0.3, 0.03*0.3)
-            delta_z = random.uniform(-0.075*0.52, 0.075*0.52)
+                pos_x, pos_z = object_pos2.pop()
             pos = {
-                    "x": self.table_top["x"] + pos_x + delta_x,
+                    "x": self.table_top["x"] + pos_x,
                     "y": self.table_top["y"] + 0.0266,
-                    "z": self.table_top["z"] + pos_z + delta_z
+                    "z": self.table_top["z"] + pos_z
                 }
             object_id = self.get_unique_id()
             self.object_info[i] = {"object_id":object_id ,"name": f"{rgb[0]} {shape[0]}", "owner":owner}

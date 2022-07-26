@@ -66,7 +66,7 @@ def get_tasks():
     if player == "player_bot":
         player = "player1"
     context = {}
-    context["task"] = metadata["task"][player]
+    context["tasks"] = metadata["task"][player]
     return flask.jsonify(**context), 200
 
 
@@ -120,16 +120,18 @@ def get_shareInfo():
 
 @tdweb.app.route('/api/v1/addInfo/', methods=['POST'])
 def add_shareInfo():
-    info = flask.request.json.get('info')
+    task = flask.request.json.get('task')
+    objects = flask.request.json.get('objects')
+    relation = flask.request.json.get('relation')
     player = flask.request.json.get('player')
-    if info is None or not player == 'player_bot':
+    if task is None or objects is None or relation is None or not player == 'player_bot':
         flask.abort(404)
     player = 'player1'
-    shareInfo = {"player":player, "info":info}
-    for task in metadata["task"][player]:
-        if task["task"] == info:
-            if not task["shared"]:
-                task["shared"] = True
+    shareInfo = {"player":player, "task":task, "objects":objects, "relation":relation}
+    for tk in metadata["task"][player]:
+        if tk["task"] == task:
+            if not tk["shared"]:
+                tk["shared"] = True
                 metadata["shareInfo"].append(shareInfo)
                 metadata["turn"]["canShare"] = False
     context = {}

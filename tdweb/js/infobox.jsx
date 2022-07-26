@@ -1,15 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import InfoPicture from './infopicture';
 
 class InfoBox extends React.Component {
     constructor(props) {
         super(props);
-        const { info} = this.props
-        console.log("constructor")
-        console.log(info)
         this.state = {
-            shareInfo: info,
+            shareInfo: []
         };
 
         this.setChecker_info = setInterval(this.checkshareInfo.bind(this), 500);
@@ -31,7 +28,8 @@ class InfoBox extends React.Component {
 
     render() {
         const {shareInfo} = this.state
-        console.log(shareInfo)
+        // console.log("shared_info")
+        // console.log(shareInfo)
         return (
             <div class="box">
                 <label class="label" style={{ fontSize: '1.5vw' }}>Shared Info</label>
@@ -45,7 +43,8 @@ class InfoBox extends React.Component {
                                         <p>Shared by {si.player}</p>
                                     </div>
                                     <div class="message-body" style={{ fontSize: '1.15vw', height: '70px', padding: '8px' }}>
-                                        {si.info}
+                                        {/* {si.task} */}
+                                        <InfoPicture tk={si} />
                                     </div>
                                 </article>
                         ))
