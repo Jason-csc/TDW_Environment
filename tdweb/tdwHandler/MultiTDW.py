@@ -1,3 +1,4 @@
+from mimetypes import init
 from tdw.controller import Controller
 from tdw.tdw_utils import TDWUtils
 from tdw.add_ons.third_person_camera import ThirdPersonCamera
@@ -34,6 +35,11 @@ class State(Enum):
     drop_back = 4
     reset_arm = 5
 
+class Place(Enum):
+    player1 = 0
+    player2 = 1
+    shared = 2
+    inBowl = 3
 
 class PDRobot(Magnebot):
     """
@@ -41,6 +47,7 @@ class PDRobot(Magnebot):
     """
 
     def __init__(self, objupdated_,robot_id: int = 0,
+            objList = None,
             position: Dict[str, float] = None, 
             rotation: Dict[str, float] = None,
             cmds: List[int] = None,
@@ -58,16 +65,17 @@ class PDRobot(Magnebot):
         self.table_top = table_top
         self.objupdated_ = objupdated_
         self.status = status
-        self.reset = 0
+        self.place = None
+        self.objList = objList
     
     def on_send(self, resp: List[bytes]) -> None:
         """
         Pick object based on objectID and drop into bowl (posBowl)
         """
         super().on_send(resp=resp)
-        print(f"====State {self.id} {self.state} {self.objID} {self.arm} {self.reset}====")
-        print(self.status)
-        print(self.cmdList)
+        # print(f"====State {self.id} {self.state} {self.objID} {self.arm}====")
+        # print(self.status)
+        # print(self.cmdList)
         if self.cmd is None and len(self.cmdList) > 0:
             self.cmd = self.cmdList.pop(0)
             if self.cmd["type"] == "pick":
@@ -86,20 +94,20 @@ class PDRobot(Magnebot):
                                 arm=self.arm)
                 self.state = State.grasp
             elif self.cmd["type"] == "drop":
-                if np.linalg.norm(TDWUtils.vector3_to_array(self.cmd["args"]) -
+                if np.linalg.norm(TDWUtils.vector3_to_array(self.cmd["args"][0]) -
                                  TDWUtils.vector3_to_array(self.table_top)) < 1e-4:
-                    self.cmd["args"]["x"] += random.uniform(-0.2,0.2)
+                    self.cmd["args"][0]["x"] += random.uniform(-0.2,0.2)
                     if self.position["z"] < 0:
-                        self.cmd["args"]["z"] += random.uniform(0,0.04)
+                        self.cmd["args"][0]["z"] += random.uniform(0,0.04)
                     else:
-                        self.cmd["args"]["z"] += random.uniform(-0.04,0)
-                elif self.cmd["args"]["x"]*self.cmd["args"]["z"] < 0 and self.arm == Arm.right:
-                    self.cmd["args"]["x"] *= 1 + random.uniform(-0.15,-0.1)
-                    self.cmd["args"]["z"] *= 1 +random.uniform(-0.03,0.06)
-                elif self.cmd["args"]["x"]*self.cmd["args"]["z"] > 0:
-                    self.cmd["args"]["x"] *= 1 + random.uniform(-0.15,-0.1)
-                    self.cmd["args"]["z"] *= 1 +random.uniform(-0.03,0.06)
-                drop_pos = self.cmd["args"]
+                        self.cmd["args"][0]["z"] += random.uniform(-0.04,0)
+                elif self.cmd["args"][0]["x"]*self.cmd["args"][0]["z"] < 0 and self.arm == Arm.right:
+                    self.cmd["args"][0]["x"] *= 1 + random.uniform(-0.15,-0.1)
+                    self.cmd["args"][0]["z"] *= 1 +random.uniform(-0.03,0.06)
+                elif self.cmd["args"][0]["x"]*self.cmd["args"][0]["z"] > 0:
+                    self.cmd["args"][0]["x"] *= 1 + random.uniform(-0.15,-0.1)
+                    self.cmd["args"][0]["z"] *= 1 +random.uniform(-0.03,0.06)
+                drop_pos = self.cmd["args"][0]
                 self.reach_for(target={
                                 "x": drop_pos["x"], 
                                 "y": drop_pos["y"]+0.5, 
@@ -115,12 +123,10 @@ class PDRobot(Magnebot):
         elif not self.cmd is None:
             if self.cmd["type"] == "pick": # 'pick' cmd
                 if self.state == State.grasp:
-                    self.reset = 0
                     self.grasp(self.objID, self.arm)
                     self.state = State.grasp_back
                     self.status[0] = "DROP"
                 elif self.state == State.grasp_back and self.action.done:
-                    self.reset = 0
                     objID, obj_x, obj_y, obj_z = self.cmd["args"]
                     delta_z = 0.25 if self.position["z"] > 0 else -0.25
                     self.reach_for(target={
@@ -134,44 +140,33 @@ class PDRobot(Magnebot):
                                     orientation_mode=OrientationMode.none) 
                     self.state = State.drop
                 elif self.state == State.drop and self.action.done:
-                    self.reset = 0
                     self.state = State.initializing
                     self.cmd = None
             elif self.cmd["type"] == "drop": # 'drop' cmd
                 if self.state == State.grasp_back and self.action.done:
-                    self.reset = 0
-                    drop_pos = self.cmd["args"]
+                    drop_pos = self.cmd["args"][0]
                     self.reach_for(target={
                                 "x": drop_pos["x"],
                                 "y": self.table_top["y"]+0.042,
                                 "z": drop_pos["z"]
                                 }, 
                                 arm=self.arm,
-                                arrived_at = 0.08,
+                                arrived_at = 0.1,
                                 target_orientation=TargetOrientation.none, 
                                 orientation_mode=OrientationMode.none)
                     self.state = State.drop
                 elif self.state == State.drop and self.action.done:
-                    self.reset = 0
                     self.drop(self.objID,self.arm)
                     self.state = State.drop_back
                     self.objupdated_[0] = False
                 elif self.state == State.drop_back and self.action.done:
-                    self.reset = 0
                     self.reset_arm(arm=self.arm)
                     self.state = State.reset_arm
                 elif self.state == State.reset_arm and self.action.done:
-                    self.reset = 0
+                    self.objList[self.objID]["status"] = self.cmd["args"][1]
                     self.state = State.initializing
                     self.objID = None
                     self.cmd = None
-                # if not self.action.done:
-                #     if self.reset > 100:
-                #         self.drop(self.objID,self.arm)
-                #         self.state = State.drop
-                #         self.reset = 0
-                #     else:
-                #         self.reset += 1
 
 
 
@@ -190,14 +185,17 @@ class MultiMagnebot(Controller):
         magnebot1_id = self.get_unique_id()
         self.magnebot1 = PDRobot(position={"x": 0, "y": 0.46, "z": -0.83}, 
                                 rotation={"x": 0, "y": 0, "z": 0},
+                                objList=self.info["objList"],
                                 robot_id=magnebot1_id,
                                 cmds=self.info["cmds1"],
                                 status=self.info["status1"],
                                 table_top = self.table_top,
-                                objupdated_=self.objupdated)
+                                objupdated_=self.objupdated,
+                                )
         magnebot2_id = self.get_unique_id()
         self.magnebot2 = PDRobot(position={"x": 0, "y": 0.46, "z": 0.83}, 
                                 rotation={"x": 0, "y": 180, "z": 0},
+                                objList=self.info["objList"],
                                 robot_id=magnebot2_id,
                                 cmds=self.info["cmds2"],
                                 status=self.info["status2"],
@@ -226,7 +224,7 @@ class MultiMagnebot(Controller):
         self.communicate(command_setup)
         
         #Initialize object db
-        self.getOBJ()
+        self.getOBJ(initial=True)
         self.generateTask()
         self.info["prepared"] = True
 
@@ -240,17 +238,19 @@ class MultiMagnebot(Controller):
         self.communicate({"$type": "terminate"})
     
 
-    def getOBJ(self):
-        for objt in self.object_info.values():
-            tmp = {}
+    def getOBJ(self, initial = False):
+        for game_id, objt in self.object_info.items():
             object_id = objt["object_id"]
-            tmp["name"] = objt["name"]
-            # update
-            tmp["position"] = self.objManager.transforms[object_id].position
-            tmp["reachable1"] = bool(tmp["position"][-1] < self.table_top["z"]+0.042)
-            tmp["reachable2"] = bool(tmp["position"][-1] > self.table_top["z"]-0.042)
-            # TO BE FIXED: hard coded for reachable
-            self.info["objList"][object_id] = tmp
+            if initial:
+                self.info["objList"][object_id] = {}
+                self.info["objList"][object_id]["status"] = objt["owner"]
+                self.info["objList"][object_id]["name"] = objt["name"]
+                self.info["objList"][object_id]["game_id"] = game_id
+            self.info["objList"][object_id]["position"] = self.objManager.transforms[object_id].position
+            self.info["objList"][object_id]["reachable1"] = bool(self.info["objList"][object_id]["position"][-1] < self.table_top["z"]+0.042)
+            self.info["objList"][object_id]["reachable2"] = bool(self.info["objList"][object_id]["position"][-1] > self.table_top["z"]-0.042)
+            
+            
 
 
 
@@ -340,7 +340,7 @@ class MultiMagnebot(Controller):
                                             dynamic_friction = 0,
                                             object_id=bowl1_id1,
                                             ))
-        bowl1_info1 = {"name":"Black Bowl", "pos":bowl1_pos1, "object_id":bowl1_id1}
+        bowl1_info1 = {"name":"Black Bowl", "pos":bowl1_pos1, "object_id":bowl1_id1, "bin_id": "A"}
         commands.extend([{"$type": "scale_object", "id": bowl1_id1, "scale_factor": {"x": 0.48, "y": 0.12, "z": 0.48}}])
         commands.extend([{"$type": "set_color", "color": {"r": 0, "g": 0.5, "b": 1, "a": 1}, "id": bowl1_id1}])
         # Bowl for player1 - 2
@@ -356,7 +356,7 @@ class MultiMagnebot(Controller):
                                             dynamic_friction = 0,
                                             object_id=bowl1_id2,
                                             ))
-        bowl1_info2 = {"name":"Green Bowl","pos":bowl1_pos2, "object_id":bowl1_id2}
+        bowl1_info2 = {"name":"Green Bowl","pos":bowl1_pos2, "object_id":bowl1_id2, "bin_id": "B"}
         commands.extend([{"$type": "scale_object", "id": bowl1_id2, "scale_factor": {"x": 0.48, "y": 0.12, "z": 0.48}}])
         commands.extend([{"$type": "set_color", "color": {"r": 0, "g": 1, "b": 0, "a": 1}, "id": bowl1_id2}])
         # Bowl for player2 - 1
@@ -374,7 +374,7 @@ class MultiMagnebot(Controller):
                                             ))
         commands.extend([{"$type": "scale_object", "id": bowl2_id1, "scale_factor": {"x": 0.34, "y": 0.05, "z": 0.34}}])
         commands.extend([{"$type": "set_color", "color": {"r": 1, "g": 0.5, "b": 0, "a": 1}, "id": bowl2_id1}])
-        bowl2_info1 = {"name":"Orange Bowl", "pos":bowl2_pos1, "object_id":bowl2_id1}
+        bowl2_info1 = {"name":"Orange Bowl", "pos":bowl2_pos1, "object_id":bowl2_id1, "bin_id": "C"}
         # Bowl for player2 - 2
         bowl2_id2 = self.get_unique_id()
         bowl2_pos2 = {"x": self.table_top['x']-0.58, "y": self.table_top['y'], "z":self.table_top['z']+0.21}
@@ -391,7 +391,7 @@ class MultiMagnebot(Controller):
                                             ))
         commands.extend([{"$type": "scale_object", "id": bowl2_id2, "scale_factor": {"x": 0.34, "y": 0.05, "z": 0.34}}])
         commands.extend([{"$type": "set_color", "color": {"r": 0, "g": 0.4, "b": 1, "a": 1}, "id": bowl2_id2}])
-        bowl2_info2 = {"name":"Blue Bowl","pos":bowl2_pos2, "object_id":bowl2_id2}
+        bowl2_info2 = {"name":"Blue Bowl","pos":bowl2_pos2, "object_id":bowl2_id2, "bin_id": "D"}
 
         '''Generate Objects'''
         self.ObjectGenerator(commands)
@@ -501,5 +501,5 @@ class MultiMagnebot(Controller):
 
 def startMultiTDW(info):
     info["start"] = True
-    c = MultiMagnebot(info=info, check_version=False, launch_build=False)
+    c = MultiMagnebot(info=info, check_version=False, launch_build=True)
     c.run()

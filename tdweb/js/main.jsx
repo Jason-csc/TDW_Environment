@@ -4,7 +4,7 @@ import Post from './post';
 // This method is only called once
 ReactDOM.render(
   // Insert the post component into the DOM
-  <Post url="/api/v1/chats/" url2="/api/v1/objlist/" url3="/api/v1/shareInfo/" />,
+  <Post url="/api/v1/chats/" url2="/api/v1/objlist/"/>,
   document.getElementById('reactEntry'),
 );
 

@@ -1,6 +1,4 @@
 """REST API for posts."""
-from asyncio import tasks
-from curses import meta
 import flask
 import tdweb
 from tdweb import metadata as metadata
@@ -128,15 +126,13 @@ def add_shareInfo():
         flask.abort(404)
     player = 'player1'
     shareInfo = {"player":player, "info":info}
-    print("-----\n"*10)
     for task in metadata["task"][player]:
-        print(task)
         if task["task"] == info:
             if not task["shared"]:
                 task["shared"] = True
                 metadata["shareInfo"].append(shareInfo)
+                metadata["turn"]["canShare"] = False
     context = {}
-    context["shareInfo"] = metadata["shareInfo"]
     return flask.jsonify(**context), 200
 
 
@@ -144,19 +140,44 @@ def add_shareInfo():
 @tdweb.app.route('/api/v1/sendcmd/',methods=['POST'])
 def send_control():
     print("sending type")
-    print(flask.request.method)
     args = flask.request.json.get('args')
     player = flask.request.json.get('player')
     cmd = flask.request.json.get('cmd')
+    print(cmd, args)
     if cmd is None or args is None or player is None:
         flask.abort(404)
     command = {"type": cmd, "args": args}
     if player in ["player1", "player_bot"]:
         metadata["cmds1"].append(command)
+        if player == "player_bot":
+            if cmd == "pick":
+                metadata["turn"]["canPick"] = False
+            elif cmd == "drop":
+                metadata["turn"]["canDrop"] = False
     elif player == "player2":
         metadata["cmds2"].append(command)
     else:
         flask.abort(404)
     
     context = {}
+    return flask.jsonify(**context), 200
+
+
+
+
+@tdweb.app.route('/api/v1/turn/',methods=['GET'])
+def get_turn():
+    context = {}
+    for k, status in metadata["turn"].items():
+        context[k] = status
+    return flask.jsonify(**context), 200
+
+
+@tdweb.app.route('/api/v1/changeturn/',methods=['PUT'])
+def change_turn():
+    context = {}
+    metadata["turn"]["playerTurn"] = False
+    metadata["turn"]["canPick"] = False
+    metadata["turn"]["canDrop"] = False
+    metadata["turn"]["canShare"] = False
     return flask.jsonify(**context), 200
