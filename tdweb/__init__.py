@@ -22,6 +22,7 @@ metadata["status1"] = ["PICK"]
 metadata["status2"] = ["PICK"]
 metadata["task"] = {"player1":[], "player2":[]}
 metadata["shareInfo"] = []
+metadata["turn"] = {"canPick": True, "canDrop": True, "canShare": True, "playerTurn":True}
 
 
 import tdweb.views  # noqa: E402  pylint: disable=wrong-import-position

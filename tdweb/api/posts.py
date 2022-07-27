@@ -1,6 +1,4 @@
 """REST API for posts."""
-from asyncio import tasks
-from curses import meta
 import flask
 import tdweb
 from tdweb import metadata as metadata
@@ -68,7 +66,7 @@ def get_tasks():
     if player == "player_bot":
         player = "player1"
     context = {}
-    context["task"] = metadata["task"][player]
+    context["tasks"] = metadata["task"][player]
     return flask.jsonify(**context), 200
 
 
@@ -122,21 +120,21 @@ def get_shareInfo():
 
 @tdweb.app.route('/api/v1/addInfo/', methods=['POST'])
 def add_shareInfo():
-    info = flask.request.json.get('info')
+    task = flask.request.json.get('task')
+    objects = flask.request.json.get('objects')
+    relation = flask.request.json.get('relation')
     player = flask.request.json.get('player')
-    if info is None or not player == 'player_bot':
+    if task is None or objects is None or relation is None or not player == 'player_bot':
         flask.abort(404)
     player = 'player1'
-    shareInfo = {"player":player, "info":info}
-    print("-----\n"*10)
-    for task in metadata["task"][player]:
-        print(task)
-        if task["task"] == info:
-            if not task["shared"]:
-                task["shared"] = True
+    shareInfo = {"player":player, "task":task, "objects":objects, "relation":relation}
+    for tk in metadata["task"][player]:
+        if tk["task"] == task:
+            if not tk["shared"]:
+                tk["shared"] = True
                 metadata["shareInfo"].append(shareInfo)
+                metadata["turn"]["canShare"] = False
     context = {}
-    context["shareInfo"] = metadata["shareInfo"]
     return flask.jsonify(**context), 200
 
 
@@ -144,19 +142,44 @@ def add_shareInfo():
 @tdweb.app.route('/api/v1/sendcmd/',methods=['POST'])
 def send_control():
     print("sending type")
-    print(flask.request.method)
     args = flask.request.json.get('args')
     player = flask.request.json.get('player')
     cmd = flask.request.json.get('cmd')
+    print(cmd, args)
     if cmd is None or args is None or player is None:
         flask.abort(404)
     command = {"type": cmd, "args": args}
     if player in ["player1", "player_bot"]:
         metadata["cmds1"].append(command)
+        if player == "player_bot":
+            if cmd == "pick":
+                metadata["turn"]["canPick"] = False
+            elif cmd == "drop":
+                metadata["turn"]["canDrop"] = False
     elif player == "player2":
         metadata["cmds2"].append(command)
     else:
         flask.abort(404)
     
     context = {}
+    return flask.jsonify(**context), 200
+
+
+
+
+@tdweb.app.route('/api/v1/turn/',methods=['GET'])
+def get_turn():
+    context = {}
+    for k, status in metadata["turn"].items():
+        context[k] = status
+    return flask.jsonify(**context), 200
+
+
+@tdweb.app.route('/api/v1/changeturn/',methods=['PUT'])
+def change_turn():
+    context = {}
+    metadata["turn"]["playerTurn"] = False
+    metadata["turn"]["canPick"] = False
+    metadata["turn"]["canDrop"] = False
+    metadata["turn"]["canShare"] = False
     return flask.jsonify(**context), 200
