@@ -501,5 +501,5 @@ class MultiMagnebot(Controller):
 
 def startMultiTDW(info):
     info["start"] = True
-    c = MultiMagnebot(info=info, check_version=False, launch_build=True)
+    c = MultiMagnebot(info=info, check_version=False, launch_build=False)
     c.run()
