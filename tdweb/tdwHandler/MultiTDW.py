@@ -106,7 +106,7 @@ class PDRobot(Magnebot):
                                 "z": drop_pos["z"]
                                 }, 
                                 arm=self.arm,
-                                arrived_at = 0.1,
+                                arrived_at = 0.1, # error considered at destination location when placing an object
                                 target_orientation=TargetOrientation.none, 
                                 orientation_mode=OrientationMode.none)      
                 self.state = State.grasp_back
@@ -441,9 +441,11 @@ class MultiMagnebot(Controller):
         assert len(self.game_config["start_config"]["player1"])*2 == obj_number
         assert len(self.game_config["start_config"]["player2"])*2 == obj_number
 
+
+        # Object Starting locations
         objects = random.sample(total_objects, obj_number)
-        object_pos1 = [(-0.32,-0.19),(-0.247,-0.09),(0.32,-0.19),(0.246,-0.09)]
-        object_pos2 = [(-0.32,0.19),(-0.246,0.09),(0.32,0.19),(0.246,0.09)]
+        object_pos1 = [(-0.12,-0.29),(-0.047,-0.19),(0.12,-0.29),(0.046,-0.19)]
+        object_pos2 = [(-0.12,0.29),(-0.046,0.19),(0.12,0.29),(0.046,0.19)]
         """
             Four center locations 'X' with random deviations
             z

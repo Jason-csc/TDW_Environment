@@ -10,7 +10,7 @@ from magnebot import Magnebot, ActionStatus, Arm
 from tdw.librarian import ModelLibrarian
 from tdw.add_ons.object_manager import ObjectManager
 from tdw.add_ons.image_capture import ImageCapture
-from tdweb.tdwHandler.imagecapture import ImgCaptureModified
+# from tdweb.tdwHandler.imagecapture import ImgCaptureModified
 
 import numpy as np
 import numpy
@@ -79,9 +79,9 @@ def startTDW():
                             avatar_id="b")
     
     om = ObjectManager(transforms=True, bounds=True, rigidbodies=True)
-    capture = ImgCaptureModified(avatar_ids=["a","b"],png=False,image_q1=metadata["camera1"],image_q2=metadata["camera2"])
+    # capture = ImgCaptureModified(avatar_ids=["a","b"],png=False,image_q1=metadata["camera1"],image_q2=metadata["camera2"])
         
-    # capture = ImageCapture(avatar_ids=[camera1.avatar_id], path="a")
+    capture = ImageCapture(avatar_ids=[camera1.avatar_id], path="a")
                             
     c.add_ons.extend([magnebot1, magnebot2, camera1,camera2,om,capture])
 
