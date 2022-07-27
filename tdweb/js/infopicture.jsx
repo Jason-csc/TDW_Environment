@@ -14,7 +14,7 @@ class InfoPicture extends React.Component {
     }
 
     getImg(name, path, type) {
-        return path+name+type
+        return path+name.replace(' ', '_')+type
     }
 
     render () {
