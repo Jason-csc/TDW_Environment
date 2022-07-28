@@ -7,6 +7,7 @@ import random
 import itertools
 import threading
 import time
+import math
 
 
 from tdweb.tdwHandler.random_game_generator import generate_game
@@ -35,7 +36,7 @@ class Game:
                 ("Black Bin", (10, 10, 10)),
                 ("Green Bin", (95, 208, 104))
         ]
-        self.object_shape = [ 'Circle', 'Rectangle']
+        self.object_shape = [ 'Circle', 'Rectangle', 'Triangle']
         self.object_color = {
             "Red": (153, 0, 0),
             "Purple": (84, 22, 144),
@@ -140,7 +141,7 @@ class Game:
             else:
                 res = (
                     center[0] - 300/3 + column*(300/3),
-                    center[1] - 354/3 + row*(354/3)
+                    center[1] - 333/3 + row*(333/3)
                 )
         return (int(res[0]),int(res[1]))
 
@@ -181,13 +182,25 @@ class Game:
             obj_id = obj["obj_id"]
             pos = obj["pos"]
             center_coordinates = self.getObjCord(obj_id,pos)
-            if shape == "Circle":
+            if shape == self.object_shape[0]:
+                # Circle
                 self.canvas = cv2.circle(self.canvas, center_coordinates, radius=radius, color=rgb, thickness=-1)
-            else:
+            elif shape == self.object_shape[1]:
+                # Rectangle
                 cx, cy = center_coordinates
                 start_point = (cx-radius, cy-radius)
                 end_point = (cx+radius, cy+radius)
                 self.canvas = cv2.rectangle(self.canvas, start_point, end_point, color=rgb, thickness=-1)
+            else:
+                # Triangle
+                cx,cy = center_coordinates
+                pt1 = (cx,cy-radius)
+                pt2 = (int(cx-radius*math.cos(math.pi/6)),int(cy+radius*math.sin(math.pi/6)))
+                pt3 = (int(cx+radius*math.cos(math.pi/6)),int(cy+radius*math.sin(math.pi/6)))
+                triangle_cnt = np.array( [pt1, pt2, pt3] )
+
+                self.canvas = cv2.drawContours(self.canvas, [triangle_cnt], 0, color=rgb, thickness=-1)
+
 
 
     def renderObj(self):
