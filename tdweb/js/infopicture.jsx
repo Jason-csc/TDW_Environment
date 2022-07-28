@@ -20,14 +20,7 @@ class InfoPicture extends React.Component {
     render () {
         const {task, objects, relation } = this.state
         // TODO: convert objects list and relation into images
-        return (
-            <div style={{ flexDirection: 'row'}}>
-                {objects.map((obj) => (
-                    <image key={obj} src={require(this.getImg(obj, "./objImage/", ".png"))} style={{ height: '80px' }}></image>
-                ))}
-                <image src={require(this.getImg(relation, "./relationImage/", ".png"))} style={{ height: '80px' }} />
-            </div>
-        ) // For now, return the sentence (TO BE REPLACED)
+        return task
     }
 
 }

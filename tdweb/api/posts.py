@@ -46,12 +46,14 @@ def get_chats_pos():
         context["positions"] = []
         if player in ["player1", "player_bot"]:
             context["status"] = metadata["status1"]
-            for tmp in metadata["placePos1"]:
-                context["positions"].append(tmp)
+            for tmp in metadata["placePos"].values():
+                if tmp["player"] in ["player1", "shared"]:
+                    context["positions"].append(tmp)
         elif player == "player2":
             context["status"] = metadata["status2"]
-            for tmp in metadata["placePos2"]:
-                context["positions"].append(tmp)
+            for tmp in metadata["placePos"].values():
+                if tmp["player"] in ["player2", "shared"]:
+                    context["positions"].append(tmp)
         else:
             raise RuntimeError(f"Error: wrong playerid {player}")
 
@@ -92,14 +94,10 @@ def add_chats():
 def get_obj():    
     context = {"obj":[]}
     player = flask.request.args.get("player")
-    for objectid,res in metadata["objList"].items():
+    for obj_id, res in metadata["objList"].items():
         tmp = {}
-        tmp["objectId"] = int(objectid)
+        tmp["objectId"] = obj_id
         tmp["objectName"] = res["name"]
-        # numpy float32 object cannot be converted to JSON
-        tmp["x"] = float(res["position"][0])
-        tmp["y"] = float(res["position"][1])
-        tmp["z"] = float(res["position"][2])
         if player in ["player1", "player_bot"]:
             tmp["reachable"] = res["reachable1"]
             context["obj"].append(tmp)

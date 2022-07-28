@@ -5,36 +5,22 @@ def startbot(info):
     # Dummy bot
     i = 0    
     while True:
-        time.sleep(0.1)
-        print("waiting", info["turn"])
         if not info["turn"]["playerTurn"]:
             print("=========State of Game=========")
             print("---------State of Objects---------")
-            for object_id, value in info["objList"].items():
+            for obj_id, value in info["objList"].items():
                 print(f"Name: {value['name']}")
-                print(f"Object_id in TDW: {object_id}")
-                print(f"Status: {value['status']}")
-                print(f"Game_id: {value['game_id']}")
-                print(f"Pos: {value['position']}")
+                print(f"Obj_id: {obj_id}")
+                print(f"Pos: {value['pos']}")
 
-            print("---------State of Bowls for Player1---------")
-            for pos1 in info["placePos1"][:2]:
-                print(f"Name: {pos1['name']}")
-                print(f"Pos: {pos1['pos']}")
-                print(f"Bin_id: {pos1['bin_id']}")
+            print("---------State of Places---------")
+            for pos1, value in info["placePos"].items():
+                print(f"Name: {value['name']}")
+                print(f"Owner: {value['player']}")
+                print(f"Bin_id: {value['bin_id']}")
             
-            print("---------State of Bowls for Player2---------")
-            for pos2 in info["placePos2"][:2]:
-                print(f"Name: {pos2['name']}")
-                print(f"Pos: {pos2['pos']}")
-                print(f"Bin_id: {pos2['bin_id']}")
             
-            print("---------State of SharePlace---------")
-            for pos in info["placePos1"][2:]:
-                print(f"Name: {pos['name']}")
-                print(f"Pos: {pos['pos']}")
-            
-            time.sleep(5)
+            time.sleep(2)
             
             t = info["task"]["player2"][i].copy()
             t["player"] = "bot"

@@ -13,7 +13,7 @@ import time
 import numpy 
 
 from tdweb.tdwHandler.bot import startbot
-from tdweb.tdwHandler.MultiTDW import startMultiTDW
+from tdweb.tdwHandler.MultiTDW_cv2 import startGame
 from tdweb import metadata as metadata
 
 import cv2
@@ -23,29 +23,11 @@ prev1 = None
 prev2 = None
 
 
-
-# import random
-# def dummy_addcmds1(metadata):
-#     #TO BE FIXED: call by buttom to add cmds
-#     print("INPUTTING PICK APPLE ")
-#     time.sleep(10)
-#     metadata["cmds1"].append(999)
-        
-    
-# def dummy_addcmds2(metadata):
-#     return 0
-#     # while True:
-#     #     # if len(metadata["cmds2"]) == 0:
-#     #     #     metadata["cmds2"].append(random.choice((1,2,1.5)))
-#     #     # time.sleep(10)
-
-
-
 @tdweb.app.route('/player1/',methods=['GET'])
 def show_player1():
     """Display / route."""
     if not metadata["start"]:
-        thread = threading.Thread(target=startMultiTDW,args=(metadata,))
+        thread = threading.Thread(target=startGame,args=(metadata,))
         thread.start()
     while True:
         if metadata["prepared"]:
@@ -68,7 +50,7 @@ def show_player2():
 def show_player_bot():
     """Display / route."""
     if not metadata["start"]:
-        thread = threading.Thread(target=startMultiTDW,args=(metadata,))
+        thread = threading.Thread(target=startGame,args=(metadata,))
         thread.start()
     while True:
         if metadata["prepared"]:

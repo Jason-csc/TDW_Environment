@@ -46,13 +46,11 @@ class ControlBox extends React.Component {
                                     {
                                         obj.map((object) => (
                                             object.reachable
-                                                ? <button class="button is-link is-outlined" value={JSON.stringify({ player: player, cmd: "pick", args: [object.objectId, object.x, object.y, object.z] })} onClick={this.handleChange} >
+                                                ? <button class="button is-link is-outlined" value={JSON.stringify({ player: player, cmd: "pick", args: object.objectId })} onClick={this.handleChange} >
                                                     {object.objectName}
-                                                    {/* {object.x} {object.y} {object.z} */}
                                                 </button>
                                                 : <button class="button is-link is-outlined" disabled>
                                                     {object.objectName}
-                                                    {/* {object.x} {object.y} {object.z} */}
                                                 </button>
                                         ))
                                     }
@@ -70,7 +68,7 @@ class ControlBox extends React.Component {
                                 <div class="buttons" >
                                     {
                                         positions.map((position) => (
-                                            <button class="button is-link is-outlined" value={JSON.stringify({ player: player, cmd: "drop", args: [position.pos, position.name] })} onClick={this.handleChange} >
+                                            <button class="button is-link is-outlined" value={JSON.stringify({ player: player, cmd: "drop", args: position.bin_id })} onClick={this.handleChange} >
                                                 {position.name}
                                             </button>
                                         ))
