@@ -35,10 +35,8 @@ class InfoPicture extends React.Component {
         };
     }
 
-    importAll(r) {
-        let images = {};
-        r.keys().map((item, index) => { images[item.replace('./', '')] = r(item); });
-        return images;
+    getImg(name, path, type) {
+        return path+name.replace(' ', '_')+type
     }
 
     render () {
