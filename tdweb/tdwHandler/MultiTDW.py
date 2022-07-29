@@ -276,8 +276,8 @@ class MultiMagnebot(Controller):
                     obj_name = self.object_info[obj_id]['name']
                     bin_name = self.bowl_info[bin_id]['name']
                     task["task"] = f"{obj_name} should be placed to {bin_name}"
-                    task["objects"] = [obj_name]
-                    task["relation"] = bin_name
+                    task["objects"] = [obj_name.replace(' ','_')]
+                    task["relation"] = [bin_name.replace(' ','_')]
                 elif knowledge[1] == "bin":
                     idf, _, obj1_id, obj2_id = knowledge
                     if not idf == "same":
@@ -285,15 +285,15 @@ class MultiMagnebot(Controller):
                     obj1_name = self.object_info[obj1_id]['name']
                     obj2_name = self.object_info[obj2_id]['name']
                     task["task"] = f"Place {obj1_name} and {obj2_name} should be placed in the {idf} bowl"
-                    task["objects"] = [obj1_name,obj2_name]
-                    task["relation"] = f"{idf} bowl"
+                    task["objects"] = [obj1_name.replace(' ','_'),obj2_name.replace(' ','_')]
+                    task["relation"] = [idf, 'bowl']
                 elif knowledge[0] in ["same", "opposite"]:
                     obj1_id, pos, obj2_id = knowledge[1:]
                     obj1_name = self.object_info[obj1_id]['name']
                     obj2_name = self.object_info[obj2_id]['name']
                     task["task"] = f"{obj1_name} and {obj2_name} should be placed in the bowl with {knowledge[0]} {pos}"
-                    task["objects"] = [obj1_name,obj2_name]
-                    task["relation"] = f"{knowledge[0]} {pos}"
+                    task["objects"] = [obj1_name.replace(' ','_'),obj2_name.replace(' ','_')]
+                    task["relation"] = [knowledge[0], pos]
                 else:
                     assert False, f"Wrong Game Knowledge: {knowledge}"
                 tasks[player].append(task)

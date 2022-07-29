@@ -242,7 +242,7 @@ class Post extends React.Component {
         return (
             <div class="container">
                 <div class="columns">
-                    <div class="column is-3">
+                    <div class="column is-4" style={{ height: '100%'}}>
                         <TaskBox task={task} player={document.body.id} canShare={canShare} handleNewInfo={this.handleNewInfo} />
                     </div>
 
